@@ -5,8 +5,8 @@
   "license": "ISC",
   "author": "",
   "scripts": {
-    "dev": "convex dev",
-    "dev:setup": "convex dev --configure --until-success"
+    "dev": "CONVEX_TMPDIR=./.tmp convex dev",
+    "dev:setup": "CONVEX_TMPDIR=./.tmp convex dev --configure --until-success"
   },
   "dependencies": {
     "convex": "catalog:",
