@@ -8,7 +8,8 @@
     "start": "next start"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.5.12",
+    "@clerk/nextjs": "^7.6.1",
+    "@clerk/ui": "^1.26.0",
     "@hotel/backend": "workspace:*",
     "@hotel/env": "workspace:*",
     "@hotel/ui": "workspace:*",

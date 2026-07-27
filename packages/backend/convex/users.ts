@@ -7,7 +7,7 @@ export const me = query({
   returns: v.union(
     v.null(),
     v.object({
-      clerkUserId: v.string(),
+      tokenIdentifier: v.string(),
       role: v.union(v.literal("guest"), v.literal("staff"), v.literal("admin")),
     }),
   ),
@@ -15,7 +15,7 @@ export const me = query({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return null;
     return {
-      clerkUserId: identity.subject,
+      tokenIdentifier: identity.tokenIdentifier,
       role: readRole(identity),
     };
   },

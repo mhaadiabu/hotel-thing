@@ -2,7 +2,6 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { env } from "@hotel/env/web";
-import { Toaster } from "@hotel/ui/components/sonner";
 import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 
@@ -16,7 +15,6 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
         {children}
       </ConvexProviderWithClerk>
-      <Toaster richColors />
     </ThemeProvider>
   );
 }
