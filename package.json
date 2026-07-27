@@ -1,0 +1,32 @@
+{
+  "name": "hotel",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "check-types": "turbo run check-types",
+    "dev:web": "turbo run dev -F web",
+    "dev:server": "turbo run dev -F @hotel/backend",
+    "dev:setup": "turbo run dev:setup -F @hotel/backend",
+    "check": "oxlint && oxfmt --write"
+  },
+  "dependencies": {
+    "@hotel/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@hotel/config": "workspace:*",
+    "@types/node": "^22.13.14",
+    "oxfmt": "^0.57.0",
+    "oxlint": "^1.72.0",
+    "turbo": "^2.10.2",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@11.15.1"
+}
