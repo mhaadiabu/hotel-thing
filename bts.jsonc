@@ -16,7 +16,11 @@
   "backend": "convex",
   "runtime": "none",
   "frontend": ["next"],
-  "addons": ["turborepo", "oxlint"],
+  "addons": [
+		"turborepo",
+		"oxlint",
+		"skills"
+	],
   "examples": [],
   "auth": "clerk",
   "payments": "none",
