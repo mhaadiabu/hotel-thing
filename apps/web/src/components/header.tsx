@@ -22,6 +22,11 @@ export default function Header() {
         <Link href="/" className="font-medium tracking-tight">
           Hotel
         </Link>
+        {userLoaded && isSignedIn && (
+          <Link href={"/rooms" as Route} className="text-muted-foreground hover:text-foreground">
+            Rooms
+          </Link>
+        )}
         {dashboardLabel && (
           <Link href={dashboardHref as Route} className="text-muted-foreground hover:text-foreground">
             {dashboardLabel}
