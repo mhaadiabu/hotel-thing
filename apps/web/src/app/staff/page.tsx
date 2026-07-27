@@ -1,13 +1,6 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@hotel/ui/components/card";
 
 import { RoleGate } from "@/components/role-gate";
 
@@ -22,27 +15,17 @@ export default function StaffPage() {
 function StaffHome() {
   const { user } = useUser();
   return (
-    <main className="container mx-auto max-w-3xl px-4 py-10">
+    <main className="container mx-auto max-w-3xl px-4 py-12">
       <div className="grid gap-6">
         <div>
-          <h1 className="font-semibold text-2xl tracking-tight">Staff</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h1 className="font-semibold text-3xl tracking-tight">Staff</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Signed in as {user?.fullName ?? user?.username ?? "staff"}.
           </p>
         </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Queue</CardTitle>
-            <CardDescription>
-              Reservations, service requests, and room status will appear here.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              The queue is empty.
-            </p>
-          </CardContent>
-        </Card>
+        <p className="text-sm text-muted-foreground">
+          Reservations, service requests, and room status will appear here.
+        </p>
       </div>
     </main>
   );

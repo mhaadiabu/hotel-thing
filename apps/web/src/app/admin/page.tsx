@@ -41,6 +41,13 @@ import { RoleGate } from "@/components/role-gate";
 const STATUSES = ["Available", "Occupied", "Maintenance", "Dirty"] as const;
 type Status = (typeof STATUSES)[number];
 
+function statusBar(s: Status): string {
+  if (s === "Available") return "bg-primary";
+  if (s === "Maintenance") return "bg-destructive";
+  if (s === "Occupied") return "bg-foreground/50";
+  return "bg-foreground/25";
+}
+
 export default function AdminPage() {
   return (
     <RoleGate allow={["admin"]}>
@@ -81,11 +88,11 @@ function AdminHome() {
   }
 
   return (
-    <main className="container mx-auto max-w-5xl px-4 py-10">
-      <div className="grid gap-6">
+    <main className="container mx-auto max-w-5xl px-4 py-12">
+      <div className="grid gap-8">
         <div>
-          <h1 className="font-semibold text-2xl tracking-tight">Rooms</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h1 className="font-semibold text-3xl tracking-tight">Rooms</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Signed in as {user?.fullName ?? user?.username ?? "admin"}.
           </p>
         </div>
@@ -155,33 +162,43 @@ function AdminHome() {
                 <TableRow>
                   <TableHead>Room</TableHead>
                   <TableHead>Type</TableHead>
-                  <TableHead>Rate</TableHead>
+                  <TableHead className="text-right">Rate</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="w-24">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {rooms.map((r) => (
-                  <TableRow key={r._id}>
-                    <TableCell className="font-medium">{r.roomNumber}</TableCell>
-                    <TableCell>{r.type}</TableCell>
-                    <TableCell>{formatRate(r.nightlyRate)}</TableCell>
+                  <TableRow key={r._id} className="border-b-0 hover:bg-muted/50">
+                    <TableCell className="font-medium font-mono tabular-nums">
+                      {r.roomNumber}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{r.type}</TableCell>
+                    <TableCell className="tabular-nums text-right">
+                      {formatRate(r.nightlyRate)}
+                    </TableCell>
                     <TableCell>
-                      <Select
-                        value={r.status}
-                        onValueChange={(v) => {
-                          if (v) updateStatus({ roomId: r._id, status: v as Status });
-                        }}
-                      >
-                        <SelectTrigger size="sm" className="w-36">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {STATUSES.map((s) => (
-                            <SelectItem key={s} value={s}>{s}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="flex items-center gap-2">
+                        <span
+                          aria-hidden
+                          className={`inline-block h-4 w-0.5 ${statusBar(r.status)}`}
+                        />
+                        <Select
+                          value={r.status}
+                          onValueChange={(v) => {
+                            if (v) updateStatus({ roomId: r._id, status: v as Status });
+                          }}
+                        >
+                          <SelectTrigger className="w-32 border-0 pl-0 shadow-none" size="sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {STATUSES.map((s) => (
+                              <SelectItem key={s} value={s}>{s}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Button

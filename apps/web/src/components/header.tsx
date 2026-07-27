@@ -5,7 +5,6 @@ import { api } from "@hotel/backend/convex/_generated/api";
 import { roleHomePath, roleLabel, type Role } from "@hotel/backend/convex/lib/roles";
 import { useQuery } from "convex/react";
 import Link from "next/link";
-
 import type { Route } from "next";
 
 export default function Header() {
@@ -17,11 +16,11 @@ export default function Header() {
   const dashboardLabel = role ? roleLabel(role) : null;
 
   return (
-    <header className="flex h-14 items-center justify-between border-b px-4">
-      <nav className="flex items-center gap-5 text-sm">
-        <Link href="/" className="font-medium tracking-tight">
-          Hotel
-        </Link>
+    <header className="flex h-16 items-center justify-between border-b px-6">
+      <Link href="/" className="font-semibold text-base tracking-tight">
+        Hotel
+      </Link>
+      <div className="flex items-center gap-6 text-sm">
         {userLoaded && isSignedIn && (
           <Link href={"/rooms" as Route} className="text-muted-foreground hover:text-foreground">
             Rooms
@@ -32,8 +31,6 @@ export default function Header() {
             {dashboardLabel}
           </Link>
         )}
-      </nav>
-      <div className="flex items-center gap-2">
         {userLoaded && (isSignedIn ? <UserButton /> : <SignInButton mode="modal" />)}
       </div>
     </header>
