@@ -23,8 +23,8 @@ export default function Home() {
 
   if (userLoaded && isSignedIn) {
     return (
-      <main className="container mx-auto max-w-2xl px-4 py-10">
-        <p className="text-sm text-muted-foreground">Redirecting.</p>
+      <main className="min-h-svh px-8 py-20">
+        <p className="text-muted-foreground text-sm">Redirecting.</p>
       </main>
     );
   }
@@ -43,22 +43,23 @@ export default function Home() {
         : "bg-destructive";
 
   return (
-    <main className="container mx-auto max-w-2xl px-4 py-16">
-      <div className="grid gap-8">
-        <div>
-          <h1 className="font-semibold text-3xl tracking-tight">Hotel operations</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+    <main className="min-h-svh px-8 py-20">
+      <div className="grid max-w-2xl gap-10">
+        <div className="font-semibold text-base tracking-tight">Hotel</div>
+        <div className="grid gap-3">
+          <h1 className="font-semibold text-4xl tracking-tight">
+            Hotel operations
+          </h1>
+          <p className="text-muted-foreground text-sm">
             Sign in to manage rooms, reservations, and guest services.
           </p>
         </div>
-
         <div>
           <SignInButton mode="modal">
             <Button size="lg">Sign in</Button>
           </SignInButton>
         </div>
-
-        <div className="flex items-center gap-2 border-t pt-6 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 border-t pt-6 text-muted-foreground text-sm">
           <span aria-hidden className={`size-2 rounded-none ${statusTone}`} />
           <span>API {statusLabel.toLowerCase()}</span>
         </div>
