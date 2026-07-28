@@ -18,7 +18,11 @@ export function readRole(identity: UserIdentity | null) {
 export async function requireAuth(ctx: AuthCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
-    throw new ConvexError({ code: "UNAUTHENTICATED", message: "You must be signed in." });
+    throw new ConvexError({
+      code: "UNAUTHENTICATED",
+      message:
+        "Convex did not receive a Clerk identity. The Clerk JWT is not reaching Convex. In the Clerk dashboard, create a JWT template named 'convex' (audience 'convex') that maps the 'role' claim from user.publicMetadata.role. In the Convex dashboard, set the environment variable CLERK_JWT_ISSUER_DOMAIN to your Clerk Frontend API URL (for example https://clerk.your-app.com, no trailing slash).",
+    });
   }
   return identity;
 }
