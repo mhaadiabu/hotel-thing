@@ -1,9 +1,7 @@
 "use client";
 
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
-import { api } from "@hotel/backend/convex/_generated/api";
 import { roleHomePath, roleLabel, type Role } from "@hotel/backend/convex/lib/roles";
-import { useQuery } from "convex/react";
 import { Bed, LayoutDashboard, Moon, Sun, type LucideIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
@@ -33,9 +31,15 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/rooms" as Route, label: "Rooms", icon: Bed },
 ];
 
+function readRole(value: unknown): Role {
+  if (value === "admin" || value === "staff" || value === "guest") {
+    return value;
+  }
+  return "guest";
+}
+
 export function AppSidebar() {
   const { isLoaded: userLoaded, isSignedIn, user } = useUser();
-  const me = useQuery(api.users.me);
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -47,11 +51,10 @@ export function AppSidebar() {
     return "outline";
   }
 
-  const role: Role | null = me?.role ?? null;
-  const dashboardHref: Route | null = role
-    ? (roleHomePath(role) as Route)
-    : null;
-  const dashboardLabel: string | null = role ? roleLabel(role) : null;
+  const meta = user?.publicMetadata as { role?: unknown } | undefined;
+  const role: Role = readRole(meta?.role);
+  const dashboardHref: Route = roleHomePath(role) as Route;
+  const dashboardLabel: string = roleLabel(role);
 
   return (
     <Sidebar>

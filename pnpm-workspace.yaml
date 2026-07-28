@@ -2,6 +2,7 @@ packages:
   - apps/*
   - packages/*
 allowBuilds:
+  '@clerk/shared': set this to true or false
   bufferutil: false
   core-js: false
   esbuild: true

@@ -9,6 +9,7 @@
     "dev:setup": "CONVEX_TMPDIR=./.tmp convex dev --configure --until-success"
   },
   "dependencies": {
+    "@clerk/backend": "^1.0.0",
     "convex": "catalog:",
     "dotenv": "catalog:",
     "zod": "catalog:"

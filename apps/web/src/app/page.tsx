@@ -8,20 +8,36 @@ import { useEffect } from "react";
 import type { Route } from "next";
 
 import { Button } from "@hotel/ui/components/button";
-import { roleHomePath } from "@hotel/backend/convex/lib/roles";
+import { roleHomePath, type Role } from "@hotel/backend/convex/lib/roles";
+
+function readRole(value: unknown): Role {
+  if (value === "admin" || value === "staff" || value === "guest") {
+    return value;
+  }
+  return "guest";
+}
 
 export default function Home() {
-  const { isLoaded: userLoaded, isSignedIn } = useUser();
-  const me = useQuery(api.users.me);
+  const { isLoaded: userLoaded, isSignedIn, user } = useUser();
   const healthCheck = useQuery(api.healthCheck.get);
   const router = useRouter();
 
   useEffect(() => {
-    if (!userLoaded || !isSignedIn || !me) return;
-    router.replace(roleHomePath(me.role) as Route);
-  }, [userLoaded, isSignedIn, me, router]);
+    if (!userLoaded || !isSignedIn || !user) return;
+    const meta = user.publicMetadata as { role?: unknown } | undefined;
+    const role = readRole(meta?.role);
+    router.replace(roleHomePath(role) as Route);
+  }, [userLoaded, isSignedIn, user, router]);
 
-  if (userLoaded && isSignedIn) {
+  if (!userLoaded) {
+    return (
+      <main className="min-h-svh px-8 py-20">
+        <p className="text-muted-foreground text-sm">Loading.</p>
+      </main>
+    );
+  }
+
+  if (isSignedIn) {
     return (
       <main className="min-h-svh px-8 py-20">
         <p className="text-muted-foreground text-sm">Redirecting.</p>
