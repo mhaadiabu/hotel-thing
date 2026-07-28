@@ -20,7 +20,7 @@
     "convex": "catalog:",
     "dotenv": "catalog:",
     "lucide-react": "catalog:",
-    "next": "^16.2.0",
+    "next": "^16.2.12",
     "next-themes": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
@@ -30,7 +30,7 @@
   "devDependencies": {
     "@hotel/config": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
-    "@types/node": "^20",
+    "@types/node": "^20.19.43",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "tailwindcss": "catalog:",
