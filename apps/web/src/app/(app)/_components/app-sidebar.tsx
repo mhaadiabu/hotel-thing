@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
 import type { Route } from "next";
 import { useEffect, useState } from "react";
 
+import { Badge } from "@hotel/ui/components/badge";
 import { Button } from "@hotel/ui/components/button";
 import {
   Sidebar,
@@ -39,6 +40,12 @@ export function AppSidebar() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  function roleBadgeVariant(r: Role): "default" | "secondary" | "outline" {
+    if (r === "admin") return "default";
+    if (r === "staff") return "secondary";
+    return "outline";
+  }
 
   const role: Role | null = me?.role ?? null;
   const dashboardHref: Route | null = role
@@ -99,6 +106,11 @@ export function AppSidebar() {
                 <span className="truncate text-xs text-muted-foreground">
                   {user?.fullName ?? user?.username ?? "user"}
                 </span>
+                {role && (
+                  <Badge variant={roleBadgeVariant(role)}>
+                    {role.charAt(0).toUpperCase() + role.slice(1)}
+                  </Badge>
+                )}
               </div>
             ) : userLoaded ? (
               <SignInButton mode="modal">

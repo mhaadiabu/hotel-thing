@@ -47,7 +47,7 @@ export default function Home() {
       <div className="grid max-w-2xl gap-10">
         <div className="font-semibold text-base tracking-tight">Hotel</div>
         <div className="grid gap-3">
-          <h1 className="font-semibold text-4xl tracking-tight">
+          <h1 className="font-heading font-semibold text-4xl tracking-tight">
             Hotel operations
           </h1>
           <p className="text-muted-foreground text-sm">

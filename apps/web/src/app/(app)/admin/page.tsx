@@ -90,7 +90,7 @@ function AdminHome() {
   return (
     <>
       <header className="border-b px-8 py-6">
-        <h1 className="font-semibold text-2xl tracking-tight">Rooms</h1>
+        <h1 className="font-heading font-semibold text-2xl tracking-tight">Rooms</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Signed in as {user?.fullName ?? user?.username ?? "admin"}.
         </p>
