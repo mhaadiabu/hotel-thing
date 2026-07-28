@@ -161,7 +161,7 @@ importers:
   packages/backend:
     dependencies:
       '@clerk/backend':
-        specifier: ^1.0.0
+        specifier: ^1.34.0
         version: 1.34.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       convex:
         specifier: 'catalog:'
@@ -177,7 +177,7 @@ importers:
         specifier: workspace:*
         version: link:../config
       '@types/node':
-        specifier: ^24.3.0
+        specifier: ^24.13.3
         version: 24.13.3
       typescript:
         specifier: 'catalog:'
@@ -7732,7 +7732,7 @@ snapshots:
       buffer: 6.0.3
       eventemitter3: 5.0.4
       uuid: 14.0.1
-      ws: 8.21.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
+      ws: 8.21.1(bufferutil@4.1.0)(utf-8-validate@6.0.6)
     optionalDependencies:
       bufferutil: 4.1.0
       utf-8-validate: 6.0.6
