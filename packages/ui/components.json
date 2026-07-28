@@ -1,12 +1,12 @@
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "base-luma",
+  "style": "base-lyra",
   "rsc": true,
   "tsx": true,
   "tailwind": {
     "config": "",
     "css": "src/styles/globals.css",
-    "baseColor": "neutral",
+    "baseColor": "olive",
     "cssVariables": true,
     "prefix": ""
   },
@@ -18,7 +18,8 @@
     "lib": "@hotel/ui/lib",
     "ui": "@hotel/ui/components"
   },
-  "menuColor": "default",
+  "menuColor": "default-translucent",
   "menuAccent": "subtle",
-  "registries": {}
+  "registries": {},
+  "rtl": false
 }
