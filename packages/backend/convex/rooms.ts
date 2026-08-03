@@ -40,6 +40,7 @@ export const list = query({
   args: {},
   returns: v.array(roomValidator),
   handler: async (ctx) => {
+    await requireRole(ctx, ["staff", "admin"]);
     return await ctx.db.query("rooms").withIndex("by_roomNumber").collect();
   },
 });
@@ -48,6 +49,7 @@ export const get = query({
   args: { roomId: v.id("rooms") },
   returns: v.union(roomValidator, v.null()),
   handler: async (ctx, args) => {
+    await requireRole(ctx, ["staff", "admin"]);
     return await ctx.db.get("rooms", args.roomId);
   },
 });

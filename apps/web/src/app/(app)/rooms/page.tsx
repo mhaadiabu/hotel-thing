@@ -26,7 +26,7 @@ function statusBar(s: string): string {
 
 export default function RoomsPage() {
   return (
-    <RoleGate allow={["admin", "staff", "guest"]}>
+    <RoleGate allow={["admin", "staff"]}>
       <RoomsView />
     </RoleGate>
   );
@@ -54,7 +54,7 @@ function RoomsView() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden rounded-xl py-0 shadow-sm">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -66,7 +66,7 @@ function RoomsView() {
                 </TableHeader>
                 <TableBody>
                   {rooms.map((r) => (
-                    <TableRow key={r._id} className="border-b-0 hover:bg-muted/50">
+                    <TableRow key={r._id} className="hover:bg-muted/50">
                       <TableCell className="font-medium font-mono tabular-nums">
                         {r.roomNumber}
                       </TableCell>
