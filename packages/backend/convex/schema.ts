@@ -6,6 +6,13 @@ export default defineSchema({
     roomNumber: v.string(),
     type: v.string(),
     nightlyRate: v.number(),
+    name: v.optional(v.string()),
+    description: v.optional(v.string()),
+    capacity: v.optional(v.number()),
+    bedType: v.optional(v.string()),
+    sizeSqm: v.optional(v.number()),
+    amenities: v.optional(v.array(v.string())),
+    imageUrls: v.optional(v.array(v.string())),
     status: v.union(
       v.literal("Available"),
       v.literal("Occupied"),
@@ -15,4 +22,18 @@ export default defineSchema({
   })
     .index("by_status", ["status"])
     .index("by_roomNumber", ["roomNumber"]),
+  reservations: defineTable({
+    roomId: v.id("rooms"),
+    guestTokenIdentifier: v.string(),
+    guestName: v.optional(v.string()),
+    guestEmail: v.optional(v.string()),
+    checkIn: v.string(),
+    checkOut: v.string(),
+    guestCount: v.number(),
+    totalAmount: v.number(),
+    status: v.union(v.literal("confirmed"), v.literal("cancelled"), v.literal("completed")),
+    createdAt: v.number(),
+  })
+    .index("by_room", ["roomId"])
+    .index("by_guest", ["guestTokenIdentifier"]),
 });

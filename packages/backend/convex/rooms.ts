@@ -15,7 +15,25 @@ const roomValidator = v.object({
   roomNumber: v.string(),
   type: v.string(),
   nightlyRate: v.number(),
+  name: v.optional(v.string()),
+  description: v.optional(v.string()),
+  capacity: v.optional(v.number()),
+  bedType: v.optional(v.string()),
+  sizeSqm: v.optional(v.number()),
+  amenities: v.optional(v.array(v.string())),
+  imageUrls: v.optional(v.array(v.string())),
   status: roomStatus,
+});
+
+export const listAvailable = query({
+  args: {},
+  returns: v.array(roomValidator),
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("rooms")
+      .withIndex("by_status", (q) => q.eq("status", "Available"))
+      .take(100);
+  },
 });
 
 export const list = query({
@@ -34,11 +52,26 @@ export const get = query({
   },
 });
 
+export const getAvailable = query({
+  args: { roomId: v.id("rooms") },
+  returns: v.union(roomValidator, v.null()),
+  handler: async (ctx, args) => {
+    const room = await ctx.db.get("rooms", args.roomId);
+    return room?.status === "Available" ? room : null;
+  },
+});
+
 export const create = mutation({
   args: {
     roomNumber: v.string(),
     type: v.string(),
     nightlyRate: v.number(),
+    name: v.optional(v.string()),
+    description: v.optional(v.string()),
+    capacity: v.optional(v.number()),
+    bedType: v.optional(v.string()),
+    sizeSqm: v.optional(v.number()),
+    amenities: v.optional(v.array(v.string())),
   },
   returns: v.id("rooms"),
   handler: async (ctx, args) => {
@@ -47,6 +80,12 @@ export const create = mutation({
       roomNumber: args.roomNumber,
       type: args.type,
       nightlyRate: args.nightlyRate,
+      name: args.name,
+      description: args.description,
+      capacity: args.capacity,
+      bedType: args.bedType,
+      sizeSqm: args.sizeSqm,
+      amenities: args.amenities,
       status: "Available",
     });
   },
@@ -58,15 +97,24 @@ export const update = mutation({
     roomNumber: v.optional(v.string()),
     type: v.optional(v.string()),
     nightlyRate: v.optional(v.number()),
+    name: v.optional(v.string()),
+    description: v.optional(v.string()),
+    capacity: v.optional(v.number()),
+    bedType: v.optional(v.string()),
+    sizeSqm: v.optional(v.number()),
+    amenities: v.optional(v.array(v.string())),
+    imageUrls: v.optional(v.array(v.string())),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
     await requireRole(ctx, ["admin"]);
-    const { roomId, roomNumber, type, nightlyRate } = args;
-    const patch: { roomNumber?: string; type?: string; nightlyRate?: number } = {};
-    if (roomNumber !== undefined) patch.roomNumber = roomNumber;
-    if (type !== undefined) patch.type = type;
-    if (nightlyRate !== undefined) patch.nightlyRate = nightlyRate;
+    const { roomId, ...updates } = args;
+    const patch: typeof updates = {};
+    for (const [key, value] of Object.entries(updates)) {
+      if (value !== undefined) {
+        Object.assign(patch, { [key]: value });
+      }
+    }
     if (Object.keys(patch).length > 0) {
       await ctx.db.patch("rooms", roomId, patch);
     }
