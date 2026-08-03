@@ -21,7 +21,7 @@ export async function requireAuth(ctx: AuthCtx) {
     throw new ConvexError({
       code: "UNAUTHENTICATED",
       message:
-        "Convex did not receive a Clerk identity. The Clerk JWT is not reaching Convex. In the Clerk dashboard, create a JWT template named 'convex' (audience 'convex') that maps the 'role' claim from user.publicMetadata.role. In the Convex dashboard, set the environment variable CLERK_JWT_ISSUER_DOMAIN to your Clerk Frontend API URL (for example https://clerk.your-app.com, no trailing slash).",
+        "Convex did not receive a Clerk identity. Check that the Clerk JWT template named 'convex' includes audience 'convex', and that CLERK_JWT_ISSUER_DOMAIN is set to the Clerk Frontend API URL, without /.well-known/jwks.json.",
     });
   }
   return identity;
