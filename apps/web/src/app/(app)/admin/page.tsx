@@ -164,7 +164,7 @@ function AdminHome() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden rounded-xl py-0 shadow-sm">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -177,7 +177,7 @@ function AdminHome() {
                 </TableHeader>
                 <TableBody>
                   {rooms.map((r) => (
-                    <TableRow key={r._id} className="border-b-0 hover:bg-muted/50">
+                    <TableRow key={r._id} className="hover:bg-muted/50">
                       <TableCell className="font-medium font-mono tabular-nums">
                         {r.roomNumber}
                       </TableCell>

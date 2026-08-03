@@ -80,7 +80,7 @@ export default function RolesPage() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden rounded-xl py-0 shadow-sm">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -95,7 +95,7 @@ export default function RolesPage() {
                       `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || "Not provided";
                     const isSoleAdmin = u.id === user?.id && u.role === "admin";
                     return (
-                      <TableRow key={u.id} className="border-b-0 hover:bg-muted/50">
+                      <TableRow key={u.id} className="hover:bg-muted/50">
                         <TableCell className="font-medium">{name}</TableCell>
                         <TableCell className="font-mono text-muted-foreground text-xs">
                           {u.email ?? "Not provided"}
