@@ -50,9 +50,7 @@ function RoomsView() {
           ) : rooms.length === 0 ? (
             <Card>
               <CardContent className="py-6">
-                <p className="text-muted-foreground text-sm">
-                  No rooms configured yet.
-                </p>
+                <p className="text-muted-foreground text-sm">No rooms configured yet.</p>
               </CardContent>
             </Card>
           ) : (
@@ -68,16 +66,11 @@ function RoomsView() {
                 </TableHeader>
                 <TableBody>
                   {rooms.map((r) => (
-                    <TableRow
-                      key={r._id}
-                      className="border-b-0 hover:bg-muted/50"
-                    >
+                    <TableRow key={r._id} className="border-b-0 hover:bg-muted/50">
                       <TableCell className="font-medium font-mono tabular-nums">
                         {r.roomNumber}
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {r.type}
-                      </TableCell>
+                      <TableCell className="text-muted-foreground">{r.type}</TableCell>
                       <TableCell className="tabular-nums text-right">
                         {formatRate(r.nightlyRate)}
                       </TableCell>

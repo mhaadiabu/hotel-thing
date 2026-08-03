@@ -122,9 +122,7 @@ function AdminHome() {
                     <Input
                       id="roomNumber"
                       value={form.roomNumber}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, roomNumber: e.target.value }))
-                      }
+                      onChange={(e) => setForm((f) => ({ ...f, roomNumber: e.target.value }))}
                     />
                   </div>
                   <div className="grid gap-1.5">
@@ -132,9 +130,7 @@ function AdminHome() {
                     <Input
                       id="type"
                       value={form.type}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, type: e.target.value }))
-                      }
+                      onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
                     />
                   </div>
                   <div className="grid gap-1.5">
@@ -146,9 +142,7 @@ function AdminHome() {
                       step="0.01"
                       min="0"
                       value={form.rateGHS}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, rateGHS: e.target.value }))
-                      }
+                      onChange={(e) => setForm((f) => ({ ...f, rateGHS: e.target.value }))}
                     />
                   </div>
                   {error && <p className="text-destructive text-sm">{error}</p>}
@@ -166,9 +160,7 @@ function AdminHome() {
           ) : rooms.length === 0 ? (
             <Card>
               <CardContent className="py-6">
-                <p className="text-muted-foreground text-sm">
-                  No rooms yet. Add the first one.
-                </p>
+                <p className="text-muted-foreground text-sm">No rooms yet. Add the first one.</p>
               </CardContent>
             </Card>
           ) : (
@@ -202,14 +194,10 @@ function AdminHome() {
                           <Select
                             value={r.status}
                             onValueChange={(v) => {
-                              if (v)
-                                updateStatus({ roomId: r._id, status: v as Status });
+                              if (v) updateStatus({ roomId: r._id, status: v as Status });
                             }}
                           >
-                            <SelectTrigger
-                              className="w-32 border-0 pl-0 shadow-none"
-                              size="sm"
-                            >
+                            <SelectTrigger className="w-32 border-0 pl-0 shadow-none" size="sm">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>

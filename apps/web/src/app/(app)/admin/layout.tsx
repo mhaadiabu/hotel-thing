@@ -12,11 +12,7 @@ const TABS: { href: Route; label: string }[] = [
   { href: "/admin/roles" as Route, label: "Roles" },
 ];
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   return (
     <RoleGate allow={["admin"]}>
@@ -32,7 +28,7 @@ export default function AdminLayout({
                   "border-b-2 py-3 text-sm transition-colors",
                   isActive
                     ? "border-foreground text-foreground"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground",
                 )}
               >
                 {tab.label}
