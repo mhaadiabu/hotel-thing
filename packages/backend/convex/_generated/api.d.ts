@@ -11,6 +11,7 @@
 import type * as healthCheck from "../healthCheck.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_roles from "../lib/roles.js";
+import type * as reservations from "../reservations.js";
 import type * as roles from "../roles.js";
 import type * as rooms from "../rooms.js";
 import type * as users from "../users.js";
@@ -25,6 +26,7 @@ declare const fullApi: ApiFromModules<{
   healthCheck: typeof healthCheck;
   "lib/auth": typeof lib_auth;
   "lib/roles": typeof lib_roles;
+  reservations: typeof reservations;
   roles: typeof roles;
   rooms: typeof rooms;
   users: typeof users;
