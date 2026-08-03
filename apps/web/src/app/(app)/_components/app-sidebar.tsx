@@ -2,7 +2,14 @@
 
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { roleHomePath, roleLabel, type Role } from "@hotel/backend/convex/lib/roles";
-import { Bed, LayoutDashboard, Moon, Sun, type LucideIcon } from "lucide-react";
+import {
+  BedIcon,
+  DashboardSquare03Icon,
+  Home03Icon,
+  Moon02Icon,
+  Sun02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -25,10 +32,11 @@ import {
   SidebarSeparator,
 } from "@hotel/ui/components/sidebar";
 
-type NavItem = { href: Route; label: string; icon: LucideIcon };
+type NavItem = { href: Route; label: string; icon: IconSvgElement };
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/rooms" as Route, label: "Rooms", icon: Bed },
+  { href: "/" as Route, label: "Public site", icon: Home03Icon },
+  { href: "/rooms" as Route, label: "Room inventory", icon: BedIcon },
 ];
 
 function readRole(value: unknown): Role {
@@ -77,7 +85,7 @@ export function AppSidebar() {
                     isActive={pathname === item.href}
                     render={<Link href={item.href} />}
                   >
-                    <item.icon />
+                    <HugeiconsIcon icon={item.icon} strokeWidth={1.8} />
                     <span>{item.label}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -88,7 +96,7 @@ export function AppSidebar() {
                     isActive={pathname === dashboardHref}
                     render={<Link href={dashboardHref} />}
                   >
-                    <LayoutDashboard />
+                    <HugeiconsIcon icon={DashboardSquare03Icon} strokeWidth={1.8} />
                     <span>{dashboardLabel}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -128,11 +136,12 @@ export function AppSidebar() {
               variant="ghost"
               size="icon-sm"
               aria-label="Toggle theme"
-              onClick={() =>
-                setTheme(resolvedTheme === "dark" ? "light" : "dark")
-              }
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
             >
-              {resolvedTheme === "dark" ? <Sun /> : <Moon />}
+              <HugeiconsIcon
+                icon={resolvedTheme === "dark" ? Sun02Icon : Moon02Icon}
+                strokeWidth={1.8}
+              />
             </Button>
           )}
         </div>

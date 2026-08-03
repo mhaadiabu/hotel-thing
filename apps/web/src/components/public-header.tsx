@@ -1,0 +1,64 @@
+"use client";
+
+import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import { Hotel01Icon, Moon02Icon, Sun02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { useTheme } from "next-themes";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+import { Button } from "@hotel/ui/components/button";
+
+export function PublicHeader() {
+  const { isLoaded, isSignedIn } = useUser();
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  return (
+    <header className="sticky top-0 z-20 border-b border-border/70 bg-background/88 backdrop-blur-xl">
+      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between gap-5 px-4 sm:px-6 lg:px-8">
+        <Link
+          href="/"
+          className="flex items-center gap-2 font-heading text-lg font-semibold tracking-tight"
+        >
+          <HugeiconsIcon icon={Hotel01Icon} strokeWidth={1.8} />
+          Haven Hotel
+        </Link>
+        <nav className="hidden items-center gap-7 text-sm text-muted-foreground sm:flex">
+          <Link href="/#rooms" className="transition-colors hover:text-foreground">
+            Rooms
+          </Link>
+          {isSignedIn ? (
+            <Link href="/guest" className="transition-colors hover:text-foreground">
+              My stays
+            </Link>
+          ) : null}
+        </nav>
+        <div className="flex items-center gap-2">
+          {mounted ? (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Toggle color theme"
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+            >
+              <HugeiconsIcon
+                icon={resolvedTheme === "dark" ? Sun02Icon : Moon02Icon}
+                strokeWidth={1.8}
+              />
+            </Button>
+          ) : null}
+          {isLoaded && isSignedIn ? (
+            <UserButton />
+          ) : isLoaded ? (
+            <SignInButton mode="modal">
+              <Button variant="outline">Sign in</Button>
+            </SignInButton>
+          ) : null}
+        </div>
+      </div>
+    </header>
+  );
+}
