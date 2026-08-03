@@ -1,6 +1,6 @@
 "use client";
 
-import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { roleHomePath, roleLabel, type Role } from "@hotel/backend/convex/lib/roles";
 import {
   BedIcon,
@@ -16,8 +16,8 @@ import { usePathname } from "next/navigation";
 import type { Route } from "next";
 import { useEffect, useState } from "react";
 
-import { Badge } from "@hotel/ui/components/badge";
 import { Button } from "@hotel/ui/components/button";
+import { AccountMenu } from "@/components/account-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -53,12 +53,6 @@ export function AppSidebar() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  function roleBadgeVariant(r: Role): "default" | "secondary" | "outline" {
-    if (r === "admin") return "default";
-    if (r === "staff") return "secondary";
-    return "outline";
-  }
-
   const meta = user?.publicMetadata as { role?: unknown } | undefined;
   const role: Role = readRole(meta?.role);
   const dashboardHref: Route = roleHomePath(role) as Route;
@@ -66,10 +60,13 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="h-16 border-b">
+      <SidebarHeader className="h-16 border-b border-sidebar-border">
         <div className="flex h-full items-center px-4">
-          <Link href="/" className="font-semibold text-base tracking-tight">
-            Hotel
+          <Link
+            href="/"
+            className="font-heading text-base font-semibold tracking-tight text-sidebar-foreground outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+          >
+            Haven Hotel
           </Link>
         </div>
       </SidebarHeader>
@@ -85,7 +82,7 @@ export function AppSidebar() {
                     isActive={pathname === item.href}
                     render={<Link href={item.href} />}
                   >
-                    <HugeiconsIcon icon={item.icon} strokeWidth={1.8} />
+                    <HugeiconsIcon icon={item.icon} aria-hidden strokeWidth={1.8} />
                     <span>{item.label}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -96,7 +93,7 @@ export function AppSidebar() {
                     isActive={pathname === dashboardHref}
                     render={<Link href={dashboardHref} />}
                   >
-                    <HugeiconsIcon icon={DashboardSquare03Icon} strokeWidth={1.8} />
+                    <HugeiconsIcon icon={DashboardSquare03Icon} aria-hidden strokeWidth={1.8} />
                     <span>{dashboardLabel}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -108,38 +105,22 @@ export function AppSidebar() {
 
       <SidebarSeparator />
 
-      <SidebarFooter className="border-t">
-        <div className="flex items-center justify-between gap-2 p-3">
+      <SidebarFooter className="border-t border-sidebar-border p-2">
+        <div className="flex items-center gap-1">
           <div className="min-w-0 flex-1">
-            {userLoaded && isSignedIn ? (
-              <div className="flex items-center gap-2">
-                <UserButton />
-                <span className="truncate text-xs text-muted-foreground">
-                  {user?.fullName ?? user?.username ?? "user"}
-                </span>
-                {role && (
-                  <Badge variant={roleBadgeVariant(role)}>
-                    {role.charAt(0).toUpperCase() + role.slice(1)}
-                  </Badge>
-                )}
-              </div>
-            ) : userLoaded ? (
-              <SignInButton mode="modal">
-                <Button size="sm" className="w-full">
-                  Sign in
-                </Button>
-              </SignInButton>
-            ) : null}
+            {userLoaded ? <AccountMenu role={isSignedIn ? role : undefined} /> : null}
           </div>
           {mounted && (
             <Button
               variant="ghost"
-              size="icon-sm"
-              aria-label="Toggle theme"
+              size="icon"
+              className="shrink-0 rounded-xl text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              aria-label="Toggle color theme"
               onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
             >
               <HugeiconsIcon
                 icon={resolvedTheme === "dark" ? Sun02Icon : Moon02Icon}
+                aria-hidden
                 strokeWidth={1.8}
               />
             </Button>

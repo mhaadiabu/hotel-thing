@@ -1,12 +1,13 @@
 "use client";
 
-import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { Hotel01Icon, Moon02Icon, Sun02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { AccountMenu } from "@/components/account-menu";
 import { Button } from "@hotel/ui/components/button";
 
 export function PublicHeader() {
@@ -23,7 +24,7 @@ export function PublicHeader() {
           href="/"
           className="flex items-center gap-2 font-heading text-lg font-semibold tracking-tight"
         >
-          <HugeiconsIcon icon={Hotel01Icon} strokeWidth={1.8} />
+          <HugeiconsIcon icon={Hotel01Icon} aria-hidden strokeWidth={1.8} />
           Haven Hotel
         </Link>
         <nav className="hidden items-center gap-7 text-sm text-muted-foreground sm:flex">
@@ -46,17 +47,12 @@ export function PublicHeader() {
             >
               <HugeiconsIcon
                 icon={resolvedTheme === "dark" ? Sun02Icon : Moon02Icon}
+                aria-hidden
                 strokeWidth={1.8}
               />
             </Button>
           ) : null}
-          {isLoaded && isSignedIn ? (
-            <UserButton />
-          ) : isLoaded ? (
-            <SignInButton mode="modal">
-              <Button variant="outline">Sign in</Button>
-            </SignInButton>
-          ) : null}
+          {isLoaded ? <AccountMenu compact /> : null}
         </div>
       </div>
     </header>
