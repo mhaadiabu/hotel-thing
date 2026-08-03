@@ -33,12 +33,12 @@ export const list = action({
       lastName: v.optional(v.string()),
       email: v.optional(v.string()),
       role: v.string(),
-    })
+    }),
   ),
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     const roleClaim = (identity?.publicMetadata as { role?: string } | null)?.role;
-    if (roleClaim !== "admin") {
+    if (!identity || roleClaim !== "admin") {
       throw new ConvexError({ code: "FORBIDDEN", message: "Admin required." });
     }
     const clerk = getClerk();
@@ -56,20 +56,33 @@ export const list = action({
 export const setRole = action({
   args: {
     userId: v.string(),
-    role: v.union(
-      v.literal("admin"),
-      v.literal("staff"),
-      v.literal("guest")
-    ),
+    role: v.union(v.literal("admin"), v.literal("staff"), v.literal("guest")),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     const roleClaim = (identity?.publicMetadata as { role?: string } | null)?.role;
-    if (roleClaim !== "admin") {
+    if (!identity || roleClaim !== "admin") {
       throw new ConvexError({ code: "FORBIDDEN", message: "Admin required." });
     }
     const clerk = getClerk();
+    const currentUserId = identity.subject;
+    const target = await clerk.users.getUser(args.userId);
+    const targetRole = readRole((target.publicMetadata as { role?: unknown } | null)?.role);
+
+    if (targetRole === "admin" && args.role !== "admin") {
+      throw new ConvexError({
+        code: "SOLE_ADMIN",
+        message: "The only admin account cannot be reassigned.",
+      });
+    }
+
+    if (args.role === "admin" && args.userId !== currentUserId) {
+      throw new ConvexError({
+        code: "SOLE_ADMIN",
+        message: "This hotel is configured for one admin account.",
+      });
+    }
     await clerk.users.updateUserMetadata(args.userId, {
       publicMetadata: { role: args.role },
     });
