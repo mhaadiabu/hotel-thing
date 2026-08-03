@@ -41,7 +41,18 @@ export function RoleGate({ allow, children }: RoleGateProps) {
     return <RedirectToSignIn />;
   }
 
-  if (me && !allow.includes(me.role)) {
+  if (!me) {
+    return (
+      <div className="container mx-auto max-w-3xl px-4 py-10">
+        <p className="font-medium">We could not verify your access.</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Sign out and sign in again. If this continues, check the Clerk Convex JWT setup.
+        </p>
+      </div>
+    );
+  }
+
+  if (!allow.includes(me.role)) {
     return (
       <div className="container mx-auto max-w-3xl px-4 py-10">
         <Skeleton className="h-8 w-48" />

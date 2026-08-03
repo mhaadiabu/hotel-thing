@@ -1,6 +1,7 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
+import { api } from "@hotel/backend/convex/_generated/api";
 import { roleHomePath, roleLabel, type Role } from "@hotel/backend/convex/lib/roles";
 import {
   BedIcon,
@@ -10,6 +11,7 @@ import {
   Sun02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
+import { useQuery } from "convex/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -49,12 +51,13 @@ function readRole(value: unknown): Role {
 export function AppSidebar() {
   const { isLoaded: userLoaded, isSignedIn, user } = useUser();
   const pathname = usePathname();
+  const me = useQuery(api.users.me);
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
   const meta = user?.publicMetadata as { role?: unknown } | undefined;
-  const role: Role = readRole(meta?.role);
+  const role: Role = me?.role ?? readRole(meta?.role);
   const dashboardHref: Route = roleHomePath(role) as Route;
   const dashboardLabel: string = roleLabel(role);
 
@@ -76,17 +79,19 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigate</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    isActive={pathname === item.href}
-                    render={<Link href={item.href} />}
-                  >
-                    <HugeiconsIcon icon={item.icon} aria-hidden strokeWidth={1.8} />
-                    <span>{item.label}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {NAV_ITEMS.filter((item) => item.href !== "/rooms" || role !== "guest").map(
+                (item) => (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      isActive={pathname === item.href}
+                      render={<Link href={item.href} />}
+                    >
+                      <HugeiconsIcon icon={item.icon} aria-hidden strokeWidth={1.8} />
+                      <span>{item.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ),
+              )}
               {dashboardHref && dashboardLabel && (
                 <SidebarMenuItem>
                   <SidebarMenuButton

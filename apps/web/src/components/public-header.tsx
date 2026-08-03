@@ -1,10 +1,14 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
+import { api } from "@hotel/backend/convex/_generated/api";
+import { roleHomePath } from "@hotel/backend/convex/lib/roles";
 import { Hotel01Icon, Moon02Icon, Sun02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useQuery } from "convex/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import type { Route } from "next";
 import { useEffect, useState } from "react";
 
 import { AccountMenu } from "@/components/account-menu";
@@ -12,6 +16,7 @@ import { Button } from "@hotel/ui/components/button";
 
 export function PublicHeader() {
   const { isLoaded, isSignedIn } = useUser();
+  const me = useQuery(api.users.me);
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -31,9 +36,12 @@ export function PublicHeader() {
           <Link href="/#rooms" className="transition-colors hover:text-foreground">
             Rooms
           </Link>
-          {isSignedIn ? (
-            <Link href="/guest" className="transition-colors hover:text-foreground">
-              My stays
+          {isSignedIn && me ? (
+            <Link
+              href={roleHomePath(me.role) as Route}
+              className="transition-colors hover:text-foreground"
+            >
+              {me.role === "guest" ? "My stays" : "Dashboard"}
             </Link>
           ) : null}
         </nav>

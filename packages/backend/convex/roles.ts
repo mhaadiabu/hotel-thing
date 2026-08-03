@@ -37,7 +37,7 @@ export const list = action({
   ),
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-    const roleClaim = (identity?.publicMetadata as { role?: string } | null)?.role;
+    const roleClaim = (identity as { role?: unknown } | null)?.role;
     if (!identity || roleClaim !== "admin") {
       throw new ConvexError({ code: "FORBIDDEN", message: "Admin required." });
     }
@@ -61,7 +61,7 @@ export const setRole = action({
   returns: v.null(),
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    const roleClaim = (identity?.publicMetadata as { role?: string } | null)?.role;
+    const roleClaim = (identity as { role?: unknown } | null)?.role;
     if (!identity || roleClaim !== "admin") {
       throw new ConvexError({ code: "FORBIDDEN", message: "Admin required." });
     }

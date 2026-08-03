@@ -7,11 +7,8 @@ type AuthCtx = QueryCtx | MutationCtx;
 
 export function readRole(identity: UserIdentity | null) {
   if (!identity) return "guest" as const;
-  const meta = (identity as { publicMetadata?: unknown }).publicMetadata;
-  if (meta !== null && typeof meta === "object") {
-    const role = (meta as Record<string, unknown>).role;
-    if (isRole(role)) return role;
-  }
+  const role = (identity as { role?: unknown }).role;
+  if (isRole(role)) return role;
   return "guest" as const;
 }
 
