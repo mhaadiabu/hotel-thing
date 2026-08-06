@@ -157,7 +157,7 @@ export default function BookingPage() {
               />
             </div>
 
-            <div className="rounded-md bg-muted p-5">
+            <div className="rounded-xl bg-muted p-5">
               <div className="flex justify-between text-sm">
                 <span>
                   {formatGHS(room.nightlyRate)} × {nights || 0} nights

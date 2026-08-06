@@ -89,7 +89,7 @@ function RoomDetails({
           </h1>
           <p className="mt-4 leading-7 text-muted-foreground">{details.description}</p>
 
-          <div className="mt-7 grid grid-cols-3 gap-3 rounded-md bg-muted p-5 text-sm">
+          <div className="mt-7 grid grid-cols-3 gap-3 rounded-xl bg-muted p-5 text-sm">
             <span className="flex flex-col gap-2">
               <HugeiconsIcon icon={UserMultipleIcon} strokeWidth={1.8} />
               {details.capacity} guests

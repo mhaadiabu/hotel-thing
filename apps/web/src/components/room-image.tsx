@@ -18,7 +18,7 @@ export function RoomImage({
   if (!src) return <RoomImagePlaceholder roomName={roomName} className={className} />;
 
   return (
-    <div className={cn("relative min-h-64 overflow-hidden rounded-lg bg-muted", className)}>
+    <div className={cn("relative min-h-64 overflow-hidden rounded-xl bg-muted", className)}>
       <Image
         src={src}
         alt={`${roomName}${index > 0 ? ` photo ${index + 1}` : ""}`}

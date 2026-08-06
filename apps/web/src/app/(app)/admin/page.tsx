@@ -170,7 +170,7 @@ export default function AdminPage() {
               </div>
               <div className="flex flex-col gap-2 sm:col-span-2">
                 <Label htmlFor="images">Room images <span className="text-muted-foreground">(up to 5)</span></Label>
-                <label htmlFor="images" className="flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed bg-muted/40 px-4 text-center text-sm text-muted-foreground hover:bg-muted">
+                <label htmlFor="images" className="flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed bg-muted/40 px-4 text-center text-sm text-muted-foreground hover:bg-muted">
                   <HugeiconsIcon icon={Image01Icon} />
                   <span>Choose JPG, PNG, or WebP images</span>
                 </label>
