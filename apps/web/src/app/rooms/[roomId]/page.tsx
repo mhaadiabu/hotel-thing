@@ -19,7 +19,7 @@ import type { Route } from "next";
 import { useParams } from "next/navigation";
 
 import { PublicHeader } from "@/components/public-header";
-import { RoomImagePlaceholder } from "@/components/room-image-placeholder";
+import { RoomImage } from "@/components/room-image";
 import { formatGHS } from "@/lib/format";
 import { getRoomPresentation } from "@/lib/rooms";
 
@@ -45,7 +45,7 @@ export default function RoomDetailsPage() {
           <p className="mt-3 text-muted-foreground">
             It may have been booked or taken offline. Browse the rooms currently open for stays.
           </p>
-          <Button className="mt-7" render={<Link href="/#rooms" />}>
+          <Button className="mt-7" render={<Link href={"/stay" as Route} />}>
             Browse available rooms
           </Button>
         </div>
@@ -66,19 +66,20 @@ function RoomDetails({
   return (
     <>
       <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
-        <Button variant="ghost" render={<Link href="/#rooms" />}>
+        <Button variant="ghost" render={<Link href={"/stay" as Route} />}>
           <HugeiconsIcon icon={ArrowLeft02Icon} strokeWidth={1.8} data-icon="inline-start" />
           All rooms
         </Button>
       </div>
       <section className="mx-auto grid max-w-7xl gap-8 px-4 pb-20 sm:px-6 lg:grid-cols-[1.25fr_0.75fr] lg:px-8">
         <div className="grid gap-4 sm:grid-cols-2">
-          <RoomImagePlaceholder
+          <RoomImage
             roomName={details.name}
+            imageUrls={room.imageUrls}
             className="min-h-[420px] sm:col-span-2 lg:min-h-[520px]"
           />
-          <RoomImagePlaceholder roomName={`${details.name} bathroom`} className="min-h-52" />
-          <RoomImagePlaceholder roomName={`${details.name} view`} className="min-h-52" />
+          <RoomImage roomName={`${details.name} bathroom`} imageUrls={room.imageUrls} index={1} className="min-h-52" />
+          <RoomImage roomName={`${details.name} view`} imageUrls={room.imageUrls} index={2} className="min-h-52" />
         </div>
 
         <aside className="lg:sticky lg:top-28 lg:self-start">

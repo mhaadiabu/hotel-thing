@@ -15,7 +15,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { PublicHeader } from "@/components/public-header";
-import { RoomImagePlaceholder } from "@/components/room-image-placeholder";
+import { RoomImage } from "@/components/room-image";
 import { formatGHS } from "@/lib/format";
 import { calculateNights, getRoomPresentation } from "@/lib/rooms";
 
@@ -61,7 +61,7 @@ export default function BookingPage() {
         <PublicHeader />
         <div className="mx-auto flex min-h-[70dvh] max-w-lg flex-col items-center justify-center px-4 text-center">
           <h1 className="font-heading text-3xl font-semibold">This room is no longer available</h1>
-          <Button className="mt-6" render={<Link href="/#rooms" />}>
+          <Button className="mt-6" render={<Link href={"/stay" as Route} />}>
             Browse rooms
           </Button>
         </div>
@@ -105,7 +105,7 @@ export default function BookingPage() {
       <PublicHeader />
       <section className="mx-auto grid max-w-5xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8 lg:py-16">
         <div>
-          <RoomImagePlaceholder roomName={details.name} className="min-h-[360px]" />
+          <RoomImage roomName={details.name} imageUrls={room.imageUrls} className="min-h-[360px]" />
           <h1 className="mt-6 font-heading text-3xl font-semibold tracking-tight">
             {details.name}
           </h1>

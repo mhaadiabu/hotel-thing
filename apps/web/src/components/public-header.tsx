@@ -33,7 +33,7 @@ export function PublicHeader() {
           Haven Hotel
         </Link>
         <nav className="hidden items-center gap-7 text-sm text-muted-foreground sm:flex">
-          <Link href="/#rooms" className="transition-colors hover:text-foreground">
+          <Link href={"/stay" as Route} className="transition-colors hover:text-foreground">
             Rooms
           </Link>
           {isSignedIn && me ? (

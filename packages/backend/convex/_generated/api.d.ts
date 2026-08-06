@@ -14,6 +14,7 @@ import type * as lib_roles from "../lib/roles.js";
 import type * as reservations from "../reservations.js";
 import type * as roles from "../roles.js";
 import type * as rooms from "../rooms.js";
+import type * as serviceRequests from "../serviceRequests.js";
 import type * as users from "../users.js";
 
 import type {
@@ -29,6 +30,7 @@ declare const fullApi: ApiFromModules<{
   reservations: typeof reservations;
   roles: typeof roles;
   rooms: typeof rooms;
+  serviceRequests: typeof serviceRequests;
   users: typeof users;
 }>;
 
