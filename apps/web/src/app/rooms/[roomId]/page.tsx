@@ -34,8 +34,8 @@ export default function RoomDetailsPage() {
       <PublicHeader />
       {room === undefined ? (
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.25fr_0.75fr] lg:px-8">
-          <Skeleton className="min-h-[560px] rounded-3xl" />
-          <Skeleton className="min-h-[420px] rounded-3xl" />
+          <Skeleton className="min-h-[560px]" />
+          <Skeleton className="min-h-[420px]" />
         </div>
       ) : room === null ? (
         <div className="mx-auto flex min-h-[70dvh] max-w-xl flex-col items-center justify-center px-4 text-center">
@@ -89,7 +89,7 @@ function RoomDetails({
           </h1>
           <p className="mt-4 leading-7 text-muted-foreground">{details.description}</p>
 
-          <div className="mt-7 grid grid-cols-3 gap-3 rounded-3xl bg-muted p-5 text-sm">
+          <div className="mt-7 grid grid-cols-3 gap-3 rounded-md bg-muted p-5 text-sm">
             <span className="flex flex-col gap-2">
               <HugeiconsIcon icon={UserMultipleIcon} strokeWidth={1.8} />
               {details.capacity} guests

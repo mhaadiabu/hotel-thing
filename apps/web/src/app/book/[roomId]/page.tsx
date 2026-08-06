@@ -35,8 +35,8 @@ export default function BookingPage() {
       <main className="min-h-[100dvh]">
         <PublicHeader />
         <div className="mx-auto grid max-w-5xl gap-8 px-4 py-12 lg:grid-cols-2">
-          <Skeleton className="h-[480px] rounded-3xl" />
-          <Skeleton className="h-[480px] rounded-3xl" />
+          <Skeleton className="h-[480px]" />
+          <Skeleton className="h-[480px]" />
         </div>
       </main>
     );
@@ -114,7 +114,7 @@ export default function BookingPage() {
           </p>
         </div>
 
-        <Card className="rounded-3xl shadow-sm">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="font-heading text-2xl font-semibold">Reserve your stay</CardTitle>
           </CardHeader>
@@ -157,7 +157,7 @@ export default function BookingPage() {
               />
             </div>
 
-            <div className="rounded-3xl bg-muted p-5">
+            <div className="rounded-md bg-muted p-5">
               <div className="flex justify-between text-sm">
                 <span>
                   {formatGHS(room.nightlyRate)} × {nights || 0} nights

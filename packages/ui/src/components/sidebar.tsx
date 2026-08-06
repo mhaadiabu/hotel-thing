@@ -255,6 +255,7 @@ function Sidebar({
 function SidebarTrigger({
   className,
   onClick,
+  children,
   ...props
 }: React.ComponentProps<typeof Button>) {
   const { toggleSidebar } = useSidebar()
@@ -272,8 +273,8 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <HugeiconsIcon icon={SidebarLeftIcon} strokeWidth={2} />
-      <span className="sr-only">Toggle Sidebar</span>
+      {children ?? <HugeiconsIcon icon={SidebarLeftIcon} strokeWidth={2} />}
+      <span className="sr-only">Toggle sidebar</span>
     </Button>
   )
 }

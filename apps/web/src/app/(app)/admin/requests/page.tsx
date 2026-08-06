@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useMutation, useQuery } from "convex/react";
 
 const STATUSES = ["open", "in_progress", "resolved"] as const;
+const STATUS_LABELS = { open: "Open", in_progress: "In progress", resolved: "Resolved" } as const;
 
 export default function RequestsPage() {
   const rows = useQuery(api.serviceRequests.listForAdmin);
@@ -26,7 +27,7 @@ export default function RequestsPage() {
               <TableCell>{roomNumber ? `Room ${roomNumber}` : "Unavailable"}</TableCell>
               <TableCell className="capitalize">{request.category}</TableCell>
               <TableCell><p className="min-w-56 max-w-md whitespace-normal">{request.details}</p></TableCell>
-              <TableCell><Select value={request.status} onValueChange={(value) => { if (value) void updateStatus({ requestId: request._id, status: value as typeof STATUSES[number] }); }}><SelectTrigger size="sm" className="w-36"><SelectValue /></SelectTrigger><SelectContent><SelectGroup>{STATUSES.map((status) => <SelectItem key={status} value={status}>{status.replace("_", " ")}</SelectItem>)}</SelectGroup></SelectContent></Select></TableCell>
+              <TableCell><Select value={request.status} onValueChange={(value) => { if (value) void updateStatus({ requestId: request._id, status: value as typeof STATUSES[number] }); }}><SelectTrigger size="sm" className="w-36"><SelectValue>{STATUS_LABELS[request.status]}</SelectValue></SelectTrigger><SelectContent><SelectGroup>{STATUSES.map((status) => <SelectItem key={status} value={status}>{STATUS_LABELS[status]}</SelectItem>)}</SelectGroup></SelectContent></Select></TableCell>
             </TableRow>)}</TableBody>
           </Table></div></Card>
         )}

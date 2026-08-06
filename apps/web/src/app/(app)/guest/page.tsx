@@ -17,6 +17,8 @@ import Link from "next/link";
 import { RoleGate } from "@/components/role-gate";
 import { formatGHS } from "@/lib/format";
 
+const CATEGORY_LABELS = { housekeeping: "Housekeeping", maintenance: "Maintenance", amenities: "Amenities", other: "Other" } as const;
+
 export default function GuestPage() {
   return (
     <RoleGate allow={["admin", "staff", "guest"]}>
@@ -47,11 +49,11 @@ function GuestHome() {
 
       {stays === undefined ? (
         <div className="mt-8 grid gap-4">
-          <Skeleton className="h-44 rounded-3xl" />
-          <Skeleton className="h-44 rounded-3xl" />
+          <Skeleton className="h-44" />
+          <Skeleton className="h-44" />
         </div>
       ) : stays.length === 0 ? (
-        <Card className="mt-8 rounded-3xl shadow-sm">
+        <Card className="mt-8 shadow-sm">
           <CardHeader>
             <CardTitle className="font-heading text-xl font-semibold">
               No stays booked yet
@@ -69,7 +71,7 @@ function GuestHome() {
       ) : (
         <div className="mt-8 grid gap-4">
           {stays.map(({ reservation, room }) => (
-            <Card key={reservation._id} className="rounded-3xl shadow-sm">
+            <Card key={reservation._id} className="shadow-sm">
               <CardContent className="grid gap-5 py-1 sm:grid-cols-[1fr_auto] sm:items-center">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -103,7 +105,7 @@ function GuestHome() {
       <Dialog open={requestStayId !== null} onOpenChange={(value) => { if (!value) setRequestStayId(null); }}>
         <DialogContent>
           <DialogHeader><DialogTitle>Request help</DialogTitle><DialogDescription>Tell the hotel team what you need during this stay.</DialogDescription></DialogHeader>
-          <div className="grid gap-4"><div className="flex flex-col gap-2"><Label>Request type</Label><Select value={category} onValueChange={(value) => { if (value) setCategory(value as typeof category); }}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectGroup><SelectItem value="housekeeping">Housekeeping</SelectItem><SelectItem value="maintenance">Maintenance</SelectItem><SelectItem value="amenities">Amenities</SelectItem><SelectItem value="other">Other</SelectItem></SelectGroup></SelectContent></Select></div><div className="flex flex-col gap-2"><Label htmlFor="request-details">Details</Label><Textarea id="request-details" value={details} onChange={(event) => setDetails(event.target.value)} placeholder="What should the team know?" /></div>{requestError ? <p className="text-sm text-destructive">{requestError}</p> : null}</div>
+          <div className="grid gap-4"><div className="flex flex-col gap-2"><Label>Request type</Label><Select value={category} onValueChange={(value) => { if (value) setCategory(value as typeof category); }}><SelectTrigger><SelectValue>{CATEGORY_LABELS[category]}</SelectValue></SelectTrigger><SelectContent><SelectGroup>{Object.entries(CATEGORY_LABELS).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectGroup></SelectContent></Select></div><div className="flex flex-col gap-2"><Label htmlFor="request-details">Details</Label><Textarea id="request-details" value={details} onChange={(event) => setDetails(event.target.value)} placeholder="What should the team know?" /></div>{requestError ? <p className="text-sm text-destructive">{requestError}</p> : null}</div>
           <DialogFooter><Button variant="outline" onClick={() => setRequestStayId(null)}>Cancel</Button><Button disabled={requestPending} onClick={async () => { if (!requestStayId) return; setRequestPending(true); setRequestError(null); try { await createRequest({ reservationId: requestStayId as never, category, details }); setRequestStayId(null); } catch (error) { setRequestError(error instanceof Error ? error.message : "Could not send request."); } finally { setRequestPending(false); } }}>{requestPending ? "Sending..." : "Send request"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>

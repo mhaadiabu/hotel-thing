@@ -13,9 +13,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <div className="flex h-14 items-center gap-3 border-b px-4 md:hidden">
-          <SidebarTrigger />
+        <div className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background px-4 md:hidden">
           <span className="font-heading font-semibold">Haven Hotel</span>
+          <SidebarTrigger className="w-auto border px-3">Menu</SidebarTrigger>
         </div>
         {children}
       </SidebarInset>

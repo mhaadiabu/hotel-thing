@@ -119,7 +119,7 @@ export default function RolesPage() {
                             }}
                           >
                             <SelectTrigger size="sm" className="w-32">
-                              <SelectValue />
+                            <SelectValue>{u.role.charAt(0).toUpperCase() + u.role.slice(1)}</SelectValue>
                             </SelectTrigger>
                             <SelectContent><SelectGroup>
                               {ROLES.map((r) => (
