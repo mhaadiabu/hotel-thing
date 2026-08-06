@@ -1,6 +1,26 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import type { Doc } from "./_generated/dataModel";
+import { mutation, query, type QueryCtx } from "./_generated/server";
 import { requireRole } from "./lib/auth";
+
+export const generateUploadUrl = mutation({
+  args: {},
+  returns: v.string(),
+  handler: async (ctx) => {
+    await requireRole(ctx, ["admin"]);
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const discardUploads = mutation({
+  args: { storageIds: v.array(v.id("_storage")) },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin"]);
+    for (const id of args.storageIds) await ctx.storage.delete(id);
+    return null;
+  },
+});
 
 const roomStatus = v.union(
   v.literal("Available"),
@@ -22,6 +42,7 @@ const roomValidator = v.object({
   sizeSqm: v.optional(v.number()),
   amenities: v.optional(v.array(v.string())),
   imageUrls: v.optional(v.array(v.string())),
+  imageStorageIds: v.optional(v.array(v.id("_storage"))),
   status: roomStatus,
 });
 
@@ -29,10 +50,11 @@ export const listAvailable = query({
   args: {},
   returns: v.array(roomValidator),
   handler: async (ctx) => {
-    return await ctx.db
+    const rooms = await ctx.db
       .query("rooms")
       .withIndex("by_status", (q) => q.eq("status", "Available"))
       .take(100);
+    return await withImageUrls(ctx, rooms);
   },
 });
 
@@ -41,7 +63,10 @@ export const list = query({
   returns: v.array(roomValidator),
   handler: async (ctx) => {
     await requireRole(ctx, ["staff", "admin"]);
-    return await ctx.db.query("rooms").withIndex("by_roomNumber").collect();
+    return await withImageUrls(
+      ctx,
+      await ctx.db.query("rooms").withIndex("by_roomNumber").collect(),
+    );
   },
 });
 
@@ -50,7 +75,8 @@ export const get = query({
   returns: v.union(roomValidator, v.null()),
   handler: async (ctx, args) => {
     await requireRole(ctx, ["staff", "admin"]);
-    return await ctx.db.get("rooms", args.roomId);
+    const room = await ctx.db.get("rooms", args.roomId);
+    return room ? (await withImageUrls(ctx, [room]))[0] : null;
   },
 });
 
@@ -59,7 +85,7 @@ export const getAvailable = query({
   returns: v.union(roomValidator, v.null()),
   handler: async (ctx, args) => {
     const room = await ctx.db.get("rooms", args.roomId);
-    return room?.status === "Available" ? room : null;
+    return room?.status === "Available" ? (await withImageUrls(ctx, [room]))[0] : null;
   },
 });
 
@@ -74,10 +100,16 @@ export const create = mutation({
     bedType: v.optional(v.string()),
     sizeSqm: v.optional(v.number()),
     amenities: v.optional(v.array(v.string())),
+    imageStorageIds: v.optional(v.array(v.id("_storage"))),
   },
   returns: v.id("rooms"),
   handler: async (ctx, args) => {
     await requireRole(ctx, ["admin"]);
+    const existing = await ctx.db
+      .query("rooms")
+      .withIndex("by_roomNumber", (q) => q.eq("roomNumber", args.roomNumber))
+      .unique();
+    if (existing) throw new Error(`Room ${args.roomNumber} already exists.`);
     return await ctx.db.insert("rooms", {
       roomNumber: args.roomNumber,
       type: args.type,
@@ -88,6 +120,7 @@ export const create = mutation({
       bedType: args.bedType,
       sizeSqm: args.sizeSqm,
       amenities: args.amenities,
+      imageStorageIds: args.imageStorageIds,
       status: "Available",
     });
   },
@@ -106,10 +139,12 @@ export const update = mutation({
     sizeSqm: v.optional(v.number()),
     amenities: v.optional(v.array(v.string())),
     imageUrls: v.optional(v.array(v.string())),
+    imageStorageIds: v.optional(v.array(v.id("_storage"))),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
     await requireRole(ctx, ["admin"]);
+    const previous = await ctx.db.get("rooms", args.roomId);
     const { roomId, ...updates } = args;
     const patch: typeof updates = {};
     for (const [key, value] of Object.entries(updates)) {
@@ -119,6 +154,11 @@ export const update = mutation({
     }
     if (Object.keys(patch).length > 0) {
       await ctx.db.patch("rooms", roomId, patch);
+    }
+    if (args.imageStorageIds && previous?.imageStorageIds) {
+      for (const id of previous.imageStorageIds) {
+        if (!args.imageStorageIds.includes(id)) await ctx.storage.delete(id);
+      }
     }
     return null;
   },
@@ -142,7 +182,22 @@ export const remove = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     await requireRole(ctx, ["admin"]);
+    const room = await ctx.db.get("rooms", args.roomId);
+    for (const id of room?.imageStorageIds ?? []) await ctx.storage.delete(id);
     await ctx.db.delete("rooms", args.roomId);
     return null;
   },
 });
+
+async function withImageUrls(ctx: QueryCtx, rooms: Doc<"rooms">[]) {
+  return await Promise.all(
+    rooms.map(async (room) => ({
+      ...room,
+      imageUrls: room.imageStorageIds
+        ? (await Promise.all(room.imageStorageIds.map((id) => ctx.storage.getUrl(id)))).filter(
+            (url): url is string => url !== null,
+          )
+        : room.imageUrls,
+    })),
+  );
+}

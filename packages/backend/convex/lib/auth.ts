@@ -7,7 +7,7 @@ type AuthCtx = QueryCtx | MutationCtx;
 
 export function readRole(identity: UserIdentity | null) {
   if (!identity) return "guest" as const;
-  const role = (identity as { role?: unknown }).role;
+  const role = identity.hotel_role ?? identity.role;
   if (isRole(role)) return role;
   return "guest" as const;
 }

@@ -13,6 +13,7 @@ export default defineSchema({
     sizeSqm: v.optional(v.number()),
     amenities: v.optional(v.array(v.string())),
     imageUrls: v.optional(v.array(v.string())),
+    imageStorageIds: v.optional(v.array(v.id("_storage"))),
     status: v.union(
       v.literal("Available"),
       v.literal("Occupied"),
@@ -36,4 +37,19 @@ export default defineSchema({
   })
     .index("by_room", ["roomId"])
     .index("by_guest", ["guestTokenIdentifier"]),
+  serviceRequests: defineTable({
+    reservationId: v.id("reservations"),
+    guestTokenIdentifier: v.string(),
+    category: v.union(
+      v.literal("housekeeping"),
+      v.literal("maintenance"),
+      v.literal("amenities"),
+      v.literal("other"),
+    ),
+    details: v.string(),
+    status: v.union(v.literal("open"), v.literal("in_progress"), v.literal("resolved")),
+    createdAt: v.number(),
+  })
+    .index("by_guest", ["guestTokenIdentifier"])
+    .index("by_status", ["status"]),
 });

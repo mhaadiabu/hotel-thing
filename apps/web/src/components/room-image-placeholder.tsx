@@ -13,7 +13,7 @@ export function RoomImagePlaceholder({
   return (
     <div
       className={cn(
-        "relative flex min-h-64 items-end overflow-hidden rounded-3xl bg-muted p-5 text-muted-foreground ring-1 ring-border",
+        "relative flex min-h-64 items-end overflow-hidden rounded-lg bg-muted p-5 text-muted-foreground ring-1 ring-border",
         className,
       )}
       role="img"

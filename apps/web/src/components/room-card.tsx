@@ -3,7 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 import type { Route } from "next";
 
-import { RoomImagePlaceholder } from "@/components/room-image-placeholder";
+import { RoomImage } from "@/components/room-image";
 import { formatGHS } from "@/lib/format";
 import { getRoomPresentation, type PublicRoom } from "@/lib/rooms";
 import { Badge } from "@hotel/ui/components/badge";
@@ -14,10 +14,11 @@ export function RoomCard({ room }: { room: PublicRoom }) {
   const details = getRoomPresentation(room);
 
   return (
-    <Card className="group gap-0 rounded-3xl py-0 shadow-sm transition-transform duration-300 hover:-translate-y-1">
-      <RoomImagePlaceholder
+    <Card className="group gap-0 overflow-hidden py-0 shadow-sm transition-transform duration-300 hover:-translate-y-1">
+      <RoomImage
         roomName={details.name}
-        className="min-h-64 rounded-b-none border-0 ring-0"
+        imageUrls={room.imageUrls}
+        className="min-h-64 rounded-none border-0 ring-0"
       />
       <CardHeader className="gap-3 px-5 pt-5">
         <div className="flex items-start justify-between gap-4">

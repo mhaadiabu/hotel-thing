@@ -9,6 +9,8 @@ import { cn } from "@hotel/ui/lib/utils";
 
 const TABS: { href: Route; label: string }[] = [
   { href: "/admin" as Route, label: "Rooms" },
+  { href: "/admin/reservations" as Route, label: "Reservations" },
+  { href: "/admin/requests" as Route, label: "Requests" },
   { href: "/admin/roles" as Route, label: "Roles" },
 ];
 
@@ -17,7 +19,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <RoleGate allow={["admin"]}>
       <div>
-        <nav className="flex items-center gap-6 border-b px-8">
+        <nav className="flex items-center gap-5 overflow-x-auto border-b px-4 sm:px-6">
           {TABS.map((tab) => {
             const isActive = pathname === tab.href;
             return (
@@ -25,7 +27,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 key={tab.href}
                 href={tab.href}
                 className={cn(
-                  "border-b-2 py-3 text-sm transition-colors",
+                  "shrink-0 border-b-2 py-3 text-sm transition-colors",
                   isActive
                     ? "border-foreground text-foreground"
                     : "border-transparent text-muted-foreground hover:text-foreground",

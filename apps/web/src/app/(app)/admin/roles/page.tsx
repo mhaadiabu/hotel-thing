@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useAction } from "convex/react";
 import { api } from "@hotel/backend/convex/_generated/api";
-import { Card, CardContent } from "@hotel/ui/components/card";
+import { Badge } from "@hotel/ui/components/badge";
+import { Card } from "@hotel/ui/components/card";
 import { Skeleton } from "@hotel/ui/components/skeleton";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -31,6 +33,7 @@ type UserRow = {
   lastName?: string;
   email?: string;
   role: string;
+  isPrimaryAdmin: boolean;
 };
 
 export default function RolesPage() {
@@ -40,6 +43,8 @@ export default function RolesPage() {
   const [users, setUsers] = useState<UserRow[] | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const currentUser = users?.find((item) => item.id === user?.id);
+  const canManageAdmins = currentUser?.isPrimaryAdmin === true;
 
   useEffect(() => {
     void listUsers({})
@@ -62,25 +67,23 @@ export default function RolesPage() {
 
   return (
     <>
-      <header className="border-b px-8 py-6">
-        <h1 className="font-heading font-semibold text-2xl tracking-tight">Roles</h1>
-        <p className="mt-1 text-muted-foreground text-sm">
-          Assign roles to users. Changes take effect on their next sign-in.
-        </p>
-      </header>
-      <div className="px-8 py-8">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        <div>
+          <p className="text-xs font-medium uppercase text-muted-foreground">Access</p>
+          <h1 className="mt-1 font-heading text-3xl font-semibold">Roles</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Admins can manage hotel operations. Only the primary admin can add or remove admins.
+          </p>
+        </div>
         <div className="grid gap-6">
           {error && <p className="text-destructive text-sm">{error}</p>}
           {users === null ? (
             <Skeleton className="h-40 w-full" />
           ) : users.length === 0 ? (
-            <Card>
-              <CardContent className="py-6">
-                <p className="text-muted-foreground text-sm">No users found.</p>
-              </CardContent>
-            </Card>
+            <p className="text-sm text-muted-foreground">No users found.</p>
           ) : (
-            <Card className="overflow-hidden rounded-xl py-0 shadow-sm">
+            <Card className="mt-2 overflow-hidden py-0 shadow-sm">
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -93,17 +96,22 @@ export default function RolesPage() {
                   {users.map((u) => {
                     const name =
                       `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || "Not provided";
-                    const isSoleAdmin = u.id === user?.id && u.role === "admin";
+                    const isProtectedAdmin = u.isPrimaryAdmin || (u.role === "admin" && !canManageAdmins);
                     return (
                       <TableRow key={u.id} className="hover:bg-muted/50">
-                        <TableCell className="font-medium">{name}</TableCell>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            {name}
+                            {u.isPrimaryAdmin ? <Badge variant="secondary">Primary admin</Badge> : null}
+                          </div>
+                        </TableCell>
                         <TableCell className="font-mono text-muted-foreground text-xs">
                           {u.email ?? "Not provided"}
                         </TableCell>
                         <TableCell>
                           <Select
                             value={u.role}
-                            disabled={pendingId === u.id || isSoleAdmin}
+                            disabled={pendingId === u.id || isProtectedAdmin}
                             onValueChange={(v) => {
                               if (v) {
                                 void handleRoleChange(u.id, v as Role);
@@ -113,27 +121,25 @@ export default function RolesPage() {
                             <SelectTrigger size="sm" className="w-32">
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent><SelectGroup>
                               {ROLES.map((r) => (
                                 <SelectItem
                                   key={r}
                                   value={r}
-                                  disabled={r === "admin" && u.id !== user?.id}
+                                  disabled={r === "admin" && !canManageAdmins}
                                 >
                                   {r.charAt(0).toUpperCase() + r.slice(1)}
                                 </SelectItem>
                               ))}
-                            </SelectContent>
+                            </SelectGroup></SelectContent>
                           </Select>
-                          {isSoleAdmin ? (
-                            <p className="mt-1 text-xs text-muted-foreground">Primary admin</p>
-                          ) : null}
                         </TableCell>
                       </TableRow>
                     );
                   })}
                 </TableBody>
               </Table>
+              </div>
             </Card>
           )}
         </div>

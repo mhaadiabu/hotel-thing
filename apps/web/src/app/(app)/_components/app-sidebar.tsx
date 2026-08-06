@@ -32,6 +32,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
+  useSidebar,
 } from "@hotel/ui/components/sidebar";
 
 type NavItem = { href: Route; label: string; icon: IconSvgElement };
@@ -53,6 +54,7 @@ export function AppSidebar() {
   const pathname = usePathname();
   const me = useQuery(api.users.me);
   const { resolvedTheme, setTheme } = useTheme();
+  const { setOpenMobile } = useSidebar();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -84,7 +86,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       isActive={pathname === item.href}
-                      render={<Link href={item.href} />}
+                      render={<Link href={item.href} onClick={() => setOpenMobile(false)} />}
                     >
                       <HugeiconsIcon icon={item.icon} aria-hidden strokeWidth={1.8} />
                       <span>{item.label}</span>
@@ -96,7 +98,7 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     isActive={pathname === dashboardHref}
-                    render={<Link href={dashboardHref} />}
+                    render={<Link href={dashboardHref} onClick={() => setOpenMobile(false)} />}
                   >
                     <HugeiconsIcon icon={DashboardSquare03Icon} aria-hidden strokeWidth={1.8} />
                     <span>{dashboardLabel}</span>

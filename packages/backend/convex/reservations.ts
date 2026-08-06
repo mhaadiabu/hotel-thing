@@ -1,7 +1,7 @@
 import { ConvexError, v } from "convex/values";
 
 import { mutation, query } from "./_generated/server";
-import { requireAuth } from "./lib/auth";
+import { requireAuth, requireRole } from "./lib/auth";
 
 const reservationStatus = v.union(
   v.literal("confirmed"),
@@ -133,6 +133,39 @@ export const mine = query({
                 type: room.type,
                 name: room.name,
               }
+            : null,
+        };
+      }),
+    );
+  },
+});
+
+export const listForAdmin = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      reservation: reservationValidator,
+      room: v.union(
+        v.object({
+          _id: v.id("rooms"),
+          roomNumber: v.string(),
+          type: v.string(),
+          name: v.optional(v.string()),
+        }),
+        v.null(),
+      ),
+    }),
+  ),
+  handler: async (ctx) => {
+    await requireRole(ctx, ["admin"]);
+    const reservations = await ctx.db.query("reservations").order("desc").take(200);
+    return await Promise.all(
+      reservations.map(async (reservation) => {
+        const room = await ctx.db.get("rooms", reservation.roomId);
+        return {
+          reservation,
+          room: room
+            ? { _id: room._id, roomNumber: room.roomNumber, type: room.type, name: room.name }
             : null,
         };
       }),

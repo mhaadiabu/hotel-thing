@@ -9,6 +9,14 @@ import { ConvexError } from "convex/values";
 const VALID_ROLES = ["admin", "staff", "guest"] as const;
 type Role = (typeof VALID_ROLES)[number];
 
+function readIdentityRole(identity: Record<string, unknown> | null): Role {
+  return readRole(identity?.hotel_role ?? identity?.role);
+}
+
+function isPrimaryAdmin(identity: Record<string, unknown> | null): boolean {
+  return identity?.hotel_primary_admin === true;
+}
+
 function readRole(value: unknown): Role {
   if (value === "admin" || value === "staff" || value === "guest") {
     return value;
@@ -33,12 +41,12 @@ export const list = action({
       lastName: v.optional(v.string()),
       email: v.optional(v.string()),
       role: v.string(),
+      isPrimaryAdmin: v.boolean(),
     }),
   ),
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-    const roleClaim = (identity as { role?: unknown } | null)?.role;
-    if (!identity || roleClaim !== "admin") {
+    if (!identity || readIdentityRole(identity) !== "admin") {
       throw new ConvexError({ code: "FORBIDDEN", message: "Admin required." });
     }
     const clerk = getClerk();
@@ -49,6 +57,8 @@ export const list = action({
       lastName: u.lastName ?? undefined,
       email: u.emailAddresses[0]?.emailAddress ?? undefined,
       role: readRole((u.publicMetadata as { role?: unknown } | null)?.role),
+      isPrimaryAdmin:
+        (u.publicMetadata as { primaryAdmin?: unknown } | null)?.primaryAdmin === true,
     }));
   },
 });
@@ -61,30 +71,34 @@ export const setRole = action({
   returns: v.null(),
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    const roleClaim = (identity as { role?: unknown } | null)?.role;
-    if (!identity || roleClaim !== "admin") {
+    if (!identity || readIdentityRole(identity) !== "admin") {
       throw new ConvexError({ code: "FORBIDDEN", message: "Admin required." });
     }
     const clerk = getClerk();
-    const currentUserId = identity.subject;
     const target = await clerk.users.getUser(args.userId);
     const targetRole = readRole((target.publicMetadata as { role?: unknown } | null)?.role);
+    const targetIsPrimary =
+      (target.publicMetadata as { primaryAdmin?: unknown } | null)?.primaryAdmin === true;
+    const actorIsPrimary = isPrimaryAdmin(identity);
 
-    if (targetRole === "admin" && args.role !== "admin") {
+    if (targetIsPrimary && args.role !== "admin") {
       throw new ConvexError({
-        code: "SOLE_ADMIN",
-        message: "The only admin account cannot be reassigned.",
+        code: "PRIMARY_ADMIN",
+        message: "The primary admin cannot be reassigned.",
       });
     }
 
-    if (args.role === "admin" && args.userId !== currentUserId) {
+    if ((args.role === "admin" || targetRole === "admin") && !actorIsPrimary) {
       throw new ConvexError({
-        code: "SOLE_ADMIN",
-        message: "This hotel is configured for one admin account.",
+        code: "PRIMARY_ADMIN_REQUIRED",
+        message: "Only the primary admin can manage admin access.",
       });
     }
     await clerk.users.updateUserMetadata(args.userId, {
-      publicMetadata: { role: args.role },
+      publicMetadata: {
+        ...target.publicMetadata,
+        role: args.role,
+      },
     });
     return null;
   },
