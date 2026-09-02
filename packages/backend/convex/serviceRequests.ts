@@ -31,6 +31,17 @@ export const create = mutation({
     if (!reservation || reservation.guestTokenIdentifier !== identity.tokenIdentifier) {
       throw new ConvexError({ code: "FORBIDDEN", message: "This stay is not linked to your account." });
     }
+    const today = new Date().toISOString().slice(0, 10);
+    if (
+      reservation.status !== "confirmed" ||
+      reservation.checkIn > today ||
+      reservation.checkOut <= today
+    ) {
+      throw new ConvexError({
+        code: "STAY_NOT_ACTIVE",
+        message: "Help requests are available between check-in and check-out.",
+      });
+    }
     const details = args.details.trim();
     if (details.length < 3 || details.length > 500) {
       throw new ConvexError({ code: "INVALID_DETAILS", message: "Enter between 3 and 500 characters." });

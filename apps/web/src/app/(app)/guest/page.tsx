@@ -36,6 +36,7 @@ function GuestHome() {
   const [details, setDetails] = useState("");
   const [requestError, setRequestError] = useState<string | null>(null);
   const [requestPending, setRequestPending] = useState(false);
+  const today = new Date().toISOString().slice(0, 10);
 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10 sm:px-8">
@@ -43,7 +44,7 @@ function GuestHome() {
         <p className="text-sm font-medium text-muted-foreground">Your account</p>
         <h1 className="mt-2 font-heading text-3xl font-semibold tracking-tight">My stays</h1>
         <p className="mt-3 leading-7 text-muted-foreground">
-          Confirmed and past reservations appear here.
+          Upcoming, current, cancelled, and past reservations appear here.
         </p>
       </div>
 
@@ -69,35 +70,54 @@ function GuestHome() {
           </CardContent>
         </Card>
       ) : (
-        <div className="mt-8 grid gap-4">
-          {stays.map(({ reservation, room }) => (
-            <Card key={reservation._id} className="shadow-sm">
-              <CardContent className="grid gap-5 py-1 sm:grid-cols-[1fr_auto] sm:items-center">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-heading text-xl font-semibold">
-                      {room?.name ?? room?.type ?? "Hotel room"}
-                    </h2>
-                    <Badge variant={reservation.status === "confirmed" ? "default" : "secondary"}>
-                      {reservation.status}
-                    </Badge>
+        <>
+          <p className="mt-8 text-sm text-muted-foreground">
+            Help requests become available during your stay.
+          </p>
+          <div className="mt-4 grid gap-4">
+            {stays.map(({ reservation, room }) => (
+              <Card key={reservation._id} className="shadow-sm">
+                <CardContent className="grid gap-5 py-1 sm:grid-cols-[1fr_auto] sm:items-center">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="font-heading text-xl font-semibold">
+                        {room?.name ?? room?.type ?? "Hotel room"}
+                      </h2>
+                      <Badge variant={reservation.status === "confirmed" ? "default" : "secondary"}>
+                        {reservation.status}
+                      </Badge>
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {reservation.checkIn} to {reservation.checkOut}
+                      {room ? ` · Room ${room.roomNumber}` : ""}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {reservation.guestCount} guest{reservation.guestCount === 1 ? "" : "s"}
+                    </p>
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {reservation.checkIn} to {reservation.checkOut}
-                    {room ? ` · Room ${room.roomNumber}` : ""}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {reservation.guestCount} guest{reservation.guestCount === 1 ? "" : "s"}
-                  </p>
-                </div>
-                <div className="font-heading text-xl font-semibold tabular-nums">
-                  {formatGHS(reservation.totalAmount)}
-                </div>
-                {reservation.status === "confirmed" ? <Button variant="outline" size="sm" onClick={() => { setRequestStayId(reservation._id); setDetails(""); setRequestError(null); }}>Request help</Button> : null}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  <div className="font-heading text-xl font-semibold tabular-nums">
+                    {formatGHS(reservation.totalAmount)}
+                  </div>
+                  {reservation.status === "confirmed" &&
+                  reservation.checkIn <= today &&
+                  today < reservation.checkOut ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setRequestStayId(reservation._id);
+                        setDetails("");
+                        setRequestError(null);
+                      }}
+                    >
+                      Request help
+                    </Button>
+                  ) : null}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
       )}
 
       {requests?.length ? <section className="mt-10"><h2 className="font-heading text-xl font-semibold">Your requests</h2><div className="mt-4 grid gap-3">{requests.map((request) => <Card key={request._id}><CardContent className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-medium capitalize">{request.category}</p><p className="text-sm text-muted-foreground">{request.details}</p></div><Badge variant={request.status === "resolved" ? "secondary" : "default"}>{request.status.replace("_", " ")}</Badge></CardContent></Card>)}</div></section> : null}
