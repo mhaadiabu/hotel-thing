@@ -9,7 +9,6 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { api } from "@hotel/backend/convex/_generated/api";
-import type { Id } from "@hotel/backend/convex/_generated/dataModel";
 import { Badge } from "@hotel/ui/components/badge";
 import { Button } from "@hotel/ui/components/button";
 import { Skeleton } from "@hotel/ui/components/skeleton";
@@ -26,7 +25,7 @@ import { getRoomPresentation } from "@/lib/rooms";
 export default function RoomDetailsPage() {
   const params = useParams<{ roomId: string }>();
   const room = useQuery(api.rooms.getAvailable, {
-    roomId: params.roomId as Id<"rooms">,
+    roomId: params.roomId,
   });
 
   return (
@@ -45,7 +44,7 @@ export default function RoomDetailsPage() {
           <p className="mt-3 text-muted-foreground">
             It may have been booked or taken offline. Browse the rooms currently open for stays.
           </p>
-          <Button className="mt-7" render={<Link href={"/stay" as Route} />}>
+          <Button className="mt-7" nativeButton={false} render={<Link href={"/stay" as Route} />}>
             Browse available rooms
           </Button>
         </div>
@@ -66,7 +65,7 @@ function RoomDetails({
   return (
     <>
       <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
-        <Button variant="ghost" render={<Link href={"/stay" as Route} />}>
+        <Button variant="ghost" nativeButton={false} render={<Link href={"/stay" as Route} />}>
           <HugeiconsIcon icon={ArrowLeft02Icon} strokeWidth={1.8} data-icon="inline-start" />
           All rooms
         </Button>
@@ -123,7 +122,7 @@ function RoomDetails({
               </div>
               <div className="text-sm text-muted-foreground">per night</div>
             </div>
-            <Button size="lg" render={<Link href={`/book/${room._id}` as Route} />}>
+            <Button size="lg" nativeButton={false} render={<Link href={`/book/${room._id}` as Route} />}>
               Book this room
             </Button>
           </div>

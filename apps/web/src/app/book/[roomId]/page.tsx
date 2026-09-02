@@ -2,7 +2,6 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { api } from "@hotel/backend/convex/_generated/api";
-import type { Id } from "@hotel/backend/convex/_generated/dataModel";
 import { Button } from "@hotel/ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@hotel/ui/components/card";
 import { Input } from "@hotel/ui/components/input";
@@ -23,7 +22,7 @@ import { calculateNights, getRoomPresentation } from "@/lib/rooms";
 export default function BookingPage() {
   const { isLoaded, isSignedIn } = useAuth();
   const params = useParams<{ roomId: string }>();
-  const roomId = params.roomId as Id<"rooms">;
+  const roomId = params.roomId;
   const room = useQuery(api.rooms.getAvailable, { roomId });
   const createReservation = useMutation(api.reservations.create);
   const router = useRouter();
@@ -37,6 +36,7 @@ export default function BookingPage() {
   });
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const today = new Date().toISOString().slice(0, 10);
 
   if (!isLoaded || room === undefined) {
     return (
@@ -69,7 +69,7 @@ export default function BookingPage() {
         <PublicHeader />
         <div className="mx-auto flex min-h-[70dvh] max-w-lg flex-col items-center justify-center px-4 text-center">
           <h1 className="font-heading text-3xl font-semibold">This room is no longer available</h1>
-          <Button className="mt-6" render={<Link href={"/stay" as Route} />}>
+          <Button className="mt-6" nativeButton={false} render={<Link href={"/stay" as Route} />}>
             Browse rooms
           </Button>
         </div>
@@ -82,6 +82,8 @@ export default function BookingPage() {
   const total = nights * room.nightlyRate;
 
   async function handleBook() {
+    if (!room) return;
+
     setError(null);
     const guestCount = Number(form.guestCount);
     if (nights < 1) {
@@ -96,12 +98,16 @@ export default function BookingPage() {
       setError("Enter the number linked to your mobile money account.");
       return;
     }
+    if (!Number.isInteger(guestCount) || guestCount < 1 || guestCount > details.capacity) {
+      setError(`Choose between 1 and ${details.capacity} guests.`);
+      return;
+    }
     setPending(true);
     try {
       // A brief delay makes the mocked checkout feel like a real authorization step.
       await new Promise((resolve) => window.setTimeout(resolve, 700));
       await createReservation({
-        roomId,
+        roomId: room._id,
         checkIn: form.checkIn,
         checkOut: form.checkOut,
         guestCount,
@@ -144,11 +150,17 @@ export default function BookingPage() {
                 <Input
                   id="checkIn"
                   type="date"
+                  min={today}
                   disabled={pending}
                   value={form.checkIn}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, checkIn: event.target.value }))
-                  }
+                  onChange={(event) => {
+                    const checkIn = event.target.value;
+                    setForm((current) => ({
+                      ...current,
+                      checkIn,
+                      checkOut: current.checkOut && current.checkOut <= checkIn ? "" : current.checkOut,
+                    }));
+                  }}
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -156,6 +168,7 @@ export default function BookingPage() {
                 <Input
                   id="checkOut"
                   type="date"
+                  min={form.checkIn || today}
                   disabled={pending}
                   value={form.checkOut}
                   onChange={(event) =>

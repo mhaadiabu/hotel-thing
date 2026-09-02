@@ -54,6 +54,7 @@ export function RoomCard({ room }: { room: PublicRoom }) {
         <Button
           variant="outline"
           className="w-full"
+          nativeButton={false}
           render={<Link href={`/rooms/${room._id}` as Route} />}
         >
           View room

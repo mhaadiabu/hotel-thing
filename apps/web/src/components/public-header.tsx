@@ -55,8 +55,8 @@ export function PublicHeader() {
             <SheetContent side="right" className="w-72">
               <SheetHeader><SheetTitle>Navigation</SheetTitle><SheetDescription>Browse Haven Hotel.</SheetDescription></SheetHeader>
               <nav className="flex flex-col gap-1 px-4">
-                <Button variant="ghost" className="justify-start" render={<Link href={"/stay" as Route} />}>Rooms</Button>
-                {isSignedIn && me ? <Button variant="ghost" className="justify-start" render={<Link href={roleHomePath(me.role) as Route} />}>{me.role === "guest" ? "My stays" : "Dashboard"}</Button> : null}
+                <Button variant="ghost" className="justify-start" nativeButton={false} render={<Link href={"/stay" as Route} />}>Rooms</Button>
+                {isSignedIn && me ? <Button variant="ghost" className="justify-start" nativeButton={false} render={<Link href={roleHomePath(me.role) as Route} />}>{me.role === "guest" ? "My stays" : "Dashboard"}</Button> : null}
               </nav>
             </SheetContent>
           </Sheet>

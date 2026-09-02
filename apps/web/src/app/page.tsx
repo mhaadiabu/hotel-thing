@@ -21,7 +21,7 @@ export default function Home() {
             <p className="text-sm font-medium">Accra, Ghana</p>
             <h1 className="mt-4 font-heading text-5xl font-semibold leading-tight sm:text-7xl">Haven Hotel</h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-white/85 sm:text-lg">Comfortable rooms, attentive service, and a straightforward stay from booking to check-out.</p>
-            <Button className="mt-8" size="lg" render={<Link href={"/stay" as Route} />}>
+            <Button className="mt-8" size="lg" nativeButton={false} render={<Link href={"/stay" as Route} />}>
               View available rooms
               <HugeiconsIcon icon={ArrowRight02Icon} data-icon="inline-end" />
             </Button>
@@ -40,7 +40,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-16 sm:py-20"><div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:flex-row sm:items-end sm:justify-between sm:px-6 lg:px-8"><div className="max-w-2xl"><p className="text-xs font-medium uppercase text-muted-foreground">Book direct</p><h2 className="mt-3 font-heading text-3xl font-semibold">Choose a room that fits the way you travel.</h2><p className="mt-4 leading-7 text-muted-foreground">See current availability, room details, rates, and photography before you reserve.</p></div><Button variant="outline" render={<Link href={"/stay" as Route} />}>Browse rooms<HugeiconsIcon icon={ArrowRight02Icon} data-icon="inline-end" /></Button></div></section>
+      <section className="py-16 sm:py-20"><div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:flex-row sm:items-end sm:justify-between sm:px-6 lg:px-8"><div className="max-w-2xl"><p className="text-xs font-medium uppercase text-muted-foreground">Book direct</p><h2 className="mt-3 font-heading text-3xl font-semibold">Choose a room that fits the way you travel.</h2><p className="mt-4 leading-7 text-muted-foreground">See current availability, room details, rates, and photography before you reserve.</p></div><Button variant="outline" nativeButton={false} render={<Link href={"/stay" as Route} />}>Browse rooms<HugeiconsIcon icon={ArrowRight02Icon} data-icon="inline-end" /></Button></div></section>
 
       <footer className="border-t py-8"><div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8"><span>Haven Hotel</span><span>Thoughtful rooms. Straightforward booking.</span></div></footer>
     </main>

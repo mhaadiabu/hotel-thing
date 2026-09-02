@@ -1,7 +1,8 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import { mutation, query, type QueryCtx } from "./_generated/server";
 import { requireRole } from "./lib/auth";
+import { inferRoomCapacity } from "./lib/rooms";
 
 export const generateUploadUrl = mutation({
   args: {},
@@ -81,10 +82,12 @@ export const get = query({
 });
 
 export const getAvailable = query({
-  args: { roomId: v.id("rooms") },
+  args: { roomId: v.string() },
   returns: v.union(roomValidator, v.null()),
   handler: async (ctx, args) => {
-    const room = await ctx.db.get("rooms", args.roomId);
+    const roomId = ctx.db.normalizeId("rooms", args.roomId);
+    if (!roomId) return null;
+    const room = await ctx.db.get("rooms", roomId);
     return room?.status === "Available" ? (await withImageUrls(ctx, [room]))[0] : null;
   },
 });
@@ -116,7 +119,7 @@ export const create = mutation({
       nightlyRate: args.nightlyRate,
       name: args.name,
       description: args.description,
-      capacity: args.capacity,
+      capacity: args.capacity ?? inferRoomCapacity(args.type),
       bedType: args.bedType,
       sizeSqm: args.sizeSqm,
       amenities: args.amenities,
@@ -182,6 +185,21 @@ export const remove = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     await requireRole(ctx, ["admin"]);
+    const today = new Date().toISOString().slice(0, 10);
+    const reservations = await ctx.db
+      .query("reservations")
+      .withIndex("by_room", (q) => q.eq("roomId", args.roomId))
+      .collect();
+    if (
+      reservations.some(
+        (reservation) => reservation.status === "confirmed" && reservation.checkOut > today,
+      )
+    ) {
+      throw new ConvexError({
+        code: "ROOM_HAS_RESERVATIONS",
+        message: "This room has an active or upcoming reservation and cannot be deleted.",
+      });
+    }
     const room = await ctx.db.get("rooms", args.roomId);
     for (const id of room?.imageStorageIds ?? []) await ctx.storage.delete(id);
     await ctx.db.delete("rooms", args.roomId);
