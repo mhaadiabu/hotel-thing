@@ -36,8 +36,21 @@ const paymentValidator = v.object({
   createdAt: v.number(),
 });
 
-function parseDate(value: string): number {
-  return Date.parse(`${value}T12:00:00Z`);
+const CALENDAR_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+function parseCalendarDate(value: string): number | null {
+  if (!CALENDAR_DATE_PATTERN.test(value)) return null;
+
+  const [year, month, day] = value.split("-").map(Number);
+  const timestamp = Date.UTC(year, month - 1, day);
+
+  if (!Number.isFinite(timestamp)) return null;
+
+  return new Date(timestamp).toISOString().slice(0, 10) === value ? timestamp : null;
+}
+
+function getHotelDay(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
 export const create = mutation({
@@ -60,17 +73,32 @@ export const create = mutation({
       });
     }
 
-    const checkInTime = parseDate(args.checkIn);
-    const checkOutTime = parseDate(args.checkOut);
-    const nights = Math.round((checkOutTime - checkInTime) / 86_400_000);
+    const checkInTime = parseCalendarDate(args.checkIn);
+    const checkOutTime = parseCalendarDate(args.checkOut);
     const capacity = room.capacity ?? 2;
 
-    if (!Number.isFinite(checkInTime) || !Number.isFinite(checkOutTime) || nights < 1) {
+    if (checkInTime === null || checkOutTime === null) {
+      throw new ConvexError({
+        code: "INVALID_DATES",
+        message: "Enter valid check-in and check-out dates.",
+      });
+    }
+
+    if (args.checkIn < getHotelDay()) {
+      throw new ConvexError({
+        code: "CHECK_IN_IN_PAST",
+        message: "Check-in cannot be before today.",
+      });
+    }
+
+    if (checkOutTime <= checkInTime) {
       throw new ConvexError({
         code: "INVALID_DATES",
         message: "Check-out must be at least one night after check-in.",
       });
     }
+
+    const nights = (checkOutTime - checkInTime) / 86_400_000;
 
     if (!Number.isInteger(args.guestCount) || args.guestCount < 1 || args.guestCount > capacity) {
       throw new ConvexError({
@@ -81,8 +109,10 @@ export const create = mutation({
 
     const existing = await ctx.db
       .query("reservations")
-      .withIndex("by_room", (q) => q.eq("roomId", args.roomId))
-      .take(200);
+      .withIndex("by_room_and_checkIn", (q) =>
+        q.eq("roomId", args.roomId).lt("checkIn", args.checkOut),
+      )
+      .collect();
     const overlaps = existing.some((reservation) => {
       if (reservation.status === "cancelled") return false;
       return args.checkIn < reservation.checkOut && args.checkOut > reservation.checkIn;

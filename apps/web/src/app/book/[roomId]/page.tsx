@@ -2,7 +2,6 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { api } from "@hotel/backend/convex/_generated/api";
-import type { Id } from "@hotel/backend/convex/_generated/dataModel";
 import { Button } from "@hotel/ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@hotel/ui/components/card";
 import { Input } from "@hotel/ui/components/input";
@@ -23,7 +22,7 @@ import { calculateNights, getRoomPresentation } from "@/lib/rooms";
 export default function BookingPage() {
   const { isLoaded, isSignedIn } = useAuth();
   const params = useParams<{ roomId: string }>();
-  const roomId = params.roomId as Id<"rooms">;
+  const roomId = params.roomId;
   const room = useQuery(api.rooms.getAvailable, { roomId });
   const createReservation = useMutation(api.reservations.create);
   const router = useRouter();
@@ -37,6 +36,7 @@ export default function BookingPage() {
   });
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const today = new Date().toISOString().slice(0, 10);
 
   if (!isLoaded || room === undefined) {
     return (
@@ -96,6 +96,10 @@ export default function BookingPage() {
       setError("Enter the number linked to your mobile money account.");
       return;
     }
+    if (!Number.isInteger(guestCount) || guestCount < 1 || guestCount > details.capacity) {
+      setError(`Choose between 1 and ${details.capacity} guests.`);
+      return;
+    }
     setPending(true);
     try {
       // A brief delay makes the mocked checkout feel like a real authorization step.
@@ -144,11 +148,17 @@ export default function BookingPage() {
                 <Input
                   id="checkIn"
                   type="date"
+                  min={today}
                   disabled={pending}
                   value={form.checkIn}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, checkIn: event.target.value }))
-                  }
+                  onChange={(event) => {
+                    const checkIn = event.target.value;
+                    setForm((current) => ({
+                      ...current,
+                      checkIn,
+                      checkOut: current.checkOut && current.checkOut <= checkIn ? "" : current.checkOut,
+                    }));
+                  }}
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -156,6 +166,7 @@ export default function BookingPage() {
                 <Input
                   id="checkOut"
                   type="date"
+                  min={form.checkIn || today}
                   disabled={pending}
                   value={form.checkOut}
                   onChange={(event) =>
