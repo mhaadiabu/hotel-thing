@@ -8,6 +8,7 @@ const reservationStatus = v.union(
   v.literal("cancelled"),
   v.literal("completed"),
 );
+const paymentMethod = v.union(v.literal("card"), v.literal("mobile_money"));
 
 const reservationValidator = v.object({
   _id: v.id("reservations"),
@@ -24,6 +25,17 @@ const reservationValidator = v.object({
   createdAt: v.number(),
 });
 
+const paymentValidator = v.object({
+  _id: v.id("payments"),
+  _creationTime: v.number(),
+  reservationId: v.id("reservations"),
+  guestTokenIdentifier: v.string(),
+  amount: v.number(),
+  method: paymentMethod,
+  status: v.literal("mock_succeeded"),
+  createdAt: v.number(),
+});
+
 function parseDate(value: string): number {
   return Date.parse(`${value}T12:00:00Z`);
 }
@@ -34,6 +46,7 @@ export const create = mutation({
     checkIn: v.string(),
     checkOut: v.string(),
     guestCount: v.number(),
+    paymentMethod,
   },
   returns: v.id("reservations"),
   handler: async (ctx, args) => {
@@ -82,7 +95,9 @@ export const create = mutation({
       });
     }
 
-    return await ctx.db.insert("reservations", {
+    const createdAt = Date.now();
+    const totalAmount = room.nightlyRate * nights;
+    const reservationId = await ctx.db.insert("reservations", {
       roomId: args.roomId,
       guestTokenIdentifier: identity.tokenIdentifier,
       guestName: identity.name,
@@ -90,10 +105,19 @@ export const create = mutation({
       checkIn: args.checkIn,
       checkOut: args.checkOut,
       guestCount: args.guestCount,
-      totalAmount: room.nightlyRate * nights,
+      totalAmount,
       status: "confirmed",
-      createdAt: Date.now(),
+      createdAt,
     });
+    await ctx.db.insert("payments", {
+      reservationId,
+      guestTokenIdentifier: identity.tokenIdentifier,
+      amount: totalAmount,
+      method: args.paymentMethod,
+      status: "mock_succeeded",
+      createdAt,
+    });
+    return reservationId;
   },
 });
 
@@ -102,6 +126,7 @@ export const mine = query({
   returns: v.array(
     v.object({
       reservation: reservationValidator,
+      payment: v.union(paymentValidator, v.null()),
       room: v.union(
         v.object({
           _id: v.id("rooms"),
@@ -124,8 +149,13 @@ export const mine = query({
     return await Promise.all(
       reservations.map(async (reservation) => {
         const room = await ctx.db.get("rooms", reservation.roomId);
+        const payment = await ctx.db
+          .query("payments")
+          .withIndex("by_reservationId", (q) => q.eq("reservationId", reservation._id))
+          .unique();
         return {
           reservation,
+          payment,
           room: room
             ? {
                 _id: room._id,
@@ -145,6 +175,7 @@ export const listForAdmin = query({
   returns: v.array(
     v.object({
       reservation: reservationValidator,
+      payment: v.union(paymentValidator, v.null()),
       room: v.union(
         v.object({
           _id: v.id("rooms"),
@@ -162,8 +193,13 @@ export const listForAdmin = query({
     return await Promise.all(
       reservations.map(async (reservation) => {
         const room = await ctx.db.get("rooms", reservation.roomId);
+        const payment = await ctx.db
+          .query("payments")
+          .withIndex("by_reservationId", (q) => q.eq("reservationId", reservation._id))
+          .unique();
         return {
           reservation,
+          payment,
           room: room
             ? { _id: room._id, roomNumber: room.roomNumber, type: room.type, name: room.name }
             : null,

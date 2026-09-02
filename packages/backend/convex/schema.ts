@@ -37,6 +37,14 @@ export default defineSchema({
   })
     .index("by_room", ["roomId"])
     .index("by_guest", ["guestTokenIdentifier"]),
+  payments: defineTable({
+    reservationId: v.id("reservations"),
+    guestTokenIdentifier: v.string(),
+    amount: v.number(),
+    method: v.union(v.literal("card"), v.literal("mobile_money")),
+    status: v.literal("mock_succeeded"),
+    createdAt: v.number(),
+  }).index("by_reservationId", ["reservationId"]),
   serviceRequests: defineTable({
     reservationId: v.id("reservations"),
     guestTokenIdentifier: v.string(),
