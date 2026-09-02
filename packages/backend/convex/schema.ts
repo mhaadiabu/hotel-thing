@@ -38,6 +38,7 @@ export default defineSchema({
     .index("by_room", ["roomId"])
     .index("by_room_and_checkIn", ["roomId", "checkIn"])
     .index("by_room_status_and_checkIn", ["roomId", "status", "checkIn"])
+    .index("by_room_status_and_checkOut", ["roomId", "status", "checkOut"])
     .index("by_guest", ["guestTokenIdentifier"]),
   payments: defineTable({
     reservationId: v.id("reservations"),
