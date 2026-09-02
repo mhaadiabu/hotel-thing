@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@hotel/backend/convex/_generated/api";
+import type { Id } from "@hotel/backend/convex/_generated/dataModel";
 import { Add01Icon, Delete02Icon, Image01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@hotel/ui/components/button";
@@ -66,6 +67,9 @@ export default function AdminPage() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [statusPendingId, setStatusPendingId] = useState<Id<"rooms"> | null>(null);
+  const [deletePending, setDeletePending] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     const urls = files.map((file) => URL.createObjectURL(file));
@@ -88,6 +92,33 @@ export default function AdminPage() {
     }
     setError(null);
     setFiles(next);
+  }
+
+  async function handleStatusChange(roomId: Id<"rooms">, status: Status) {
+    setStatusPendingId(roomId);
+    setActionError(null);
+    try {
+      await updateStatus({ roomId, status });
+    } catch (cause) {
+      setActionError(cause instanceof Error ? cause.message : "The room status could not be updated.");
+    } finally {
+      setStatusPendingId(null);
+    }
+  }
+
+  async function handleDelete() {
+    if (!roomToDelete) return;
+
+    setDeletePending(true);
+    setActionError(null);
+    try {
+      await removeRoom({ roomId: roomToDelete._id });
+      setDeleteId(null);
+    } catch (cause) {
+      setActionError(cause instanceof Error ? cause.message : "The room could not be deleted.");
+    } finally {
+      setDeletePending(false);
+    }
   }
 
   async function handleCreate() {
@@ -192,6 +223,7 @@ export default function AdminPage() {
       </div>
 
       <div className="mt-8">
+        {actionError ? <p role="alert" className="mb-4 text-sm text-destructive">{actionError}</p> : null}
         {rooms === undefined ? <Skeleton className="h-64 w-full" /> : rooms.length === 0 ? (
           <Card className="border-dashed shadow-none">
             <Empty className="min-h-64">
@@ -215,12 +247,18 @@ export default function AdminPage() {
                       <TableCell>{room.type}</TableCell>
                       <TableCell className="tabular-nums">{formatRate(room.nightlyRate)}</TableCell>
                       <TableCell>
-                        <Select value={room.status} onValueChange={(value) => { if (value) void updateStatus({ roomId: room._id, status: value as Status }); }}>
+                        <Select
+                          value={room.status}
+                          disabled={statusPendingId === room._id}
+                          onValueChange={(value) => {
+                            if (value) void handleStatusChange(room._id, value as Status);
+                          }}
+                        >
                           <SelectTrigger size="sm" className="w-36"><SelectValue /></SelectTrigger>
                           <SelectContent><SelectGroup>{STATUSES.map((status) => <SelectItem key={status} value={status}>{status}</SelectItem>)}</SelectGroup></SelectContent>
                         </Select>
                       </TableCell>
-                      <TableCell className="text-right"><Button variant="ghost" size="icon-sm" aria-label={`Delete room ${room.roomNumber}`} onClick={() => setDeleteId(room._id)}><HugeiconsIcon icon={Delete02Icon} /></Button></TableCell>
+                      <TableCell className="text-right"><Button variant="ghost" size="icon-sm" aria-label={`Delete room ${room.roomNumber}`} onClick={() => { setActionError(null); setDeleteId(room._id); }}><HugeiconsIcon icon={Delete02Icon} /></Button></TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -230,10 +268,11 @@ export default function AdminPage() {
         )}
       </div>
 
-      <Dialog open={deleteId !== null} onOpenChange={(value) => { if (!value) setDeleteId(null); }}>
+      <Dialog open={deleteId !== null} onOpenChange={(value) => { if (!value && !deletePending) { setDeleteId(null); setActionError(null); } }}>
         <DialogContent>
           <DialogHeader><DialogTitle>Delete room {roomToDelete?.roomNumber}?</DialogTitle><DialogDescription>This removes the room and its uploaded images. Existing reservation records remain available.</DialogDescription></DialogHeader>
-          <DialogFooter><DialogClose render={<Button variant="outline" />}>Cancel</DialogClose><Button variant="destructive" onClick={async () => { if (!roomToDelete) return; await removeRoom({ roomId: roomToDelete._id }); setDeleteId(null); }}>Delete room</Button></DialogFooter>
+          {actionError ? <p role="alert" className="text-sm text-destructive">{actionError}</p> : null}
+          <DialogFooter><DialogClose render={<Button variant="outline" disabled={deletePending} />}>Cancel</DialogClose><Button variant="destructive" disabled={deletePending} onClick={() => void handleDelete()}>{deletePending ? "Deleting..." : "Delete room"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

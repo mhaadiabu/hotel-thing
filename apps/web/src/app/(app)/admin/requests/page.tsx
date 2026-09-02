@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
+
 import { api } from "@hotel/backend/convex/_generated/api";
+import type { Id } from "@hotel/backend/convex/_generated/dataModel";
 import { Card } from "@hotel/ui/components/card";
 import {
   Select,
@@ -42,6 +45,24 @@ const STATUS_STYLES = {
 export default function RequestsPage() {
   const rows = useQuery(api.serviceRequests.listForAdmin);
   const updateStatus = useMutation(api.serviceRequests.updateStatus);
+  const [pendingRequestId, setPendingRequestId] = useState<Id<"serviceRequests"> | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleStatusChange(
+    requestId: Id<"serviceRequests">,
+    status: (typeof STATUSES)[number],
+  ) {
+    setPendingRequestId(requestId);
+    setError(null);
+    try {
+      await updateStatus({ requestId, status });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "The request status could not be updated.");
+    } finally {
+      setPendingRequestId(null);
+    }
+  }
+
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       <p className="text-xs font-medium uppercase text-muted-foreground">Guest services</p>
@@ -49,6 +70,7 @@ export default function RequestsPage() {
       <p className="mt-2 text-sm text-muted-foreground">
         Track housekeeping, maintenance, amenity, and other requests from booked guests.
       </p>
+      {error ? <p role="alert" className="mt-4 text-sm text-destructive">{error}</p> : null}
       <div className="mt-8">
         {rows === undefined ? (
           <Skeleton className="h-64 w-full" />
@@ -89,12 +111,13 @@ export default function RequestsPage() {
                       <TableCell>
                         <Select
                           value={request.status}
+                          disabled={pendingRequestId === request._id}
                           onValueChange={(value) => {
                             if (value)
-                              void updateStatus({
-                                requestId: request._id,
-                                status: value as (typeof STATUSES)[number],
-                              });
+                              void handleStatusChange(
+                                request._id,
+                                value as (typeof STATUSES)[number],
+                              );
                           }}
                         >
                           <SelectTrigger
