@@ -81,10 +81,12 @@ export const get = query({
 });
 
 export const getAvailable = query({
-  args: { roomId: v.id("rooms") },
+  args: { roomId: v.string() },
   returns: v.union(roomValidator, v.null()),
   handler: async (ctx, args) => {
-    const room = await ctx.db.get("rooms", args.roomId);
+    const roomId = ctx.db.normalizeId("rooms", args.roomId);
+    if (!roomId) return null;
+    const room = await ctx.db.get("rooms", roomId);
     return room?.status === "Available" ? (await withImageUrls(ctx, [room]))[0] : null;
   },
 });

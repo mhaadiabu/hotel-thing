@@ -82,6 +82,8 @@ export default function BookingPage() {
   const total = nights * room.nightlyRate;
 
   async function handleBook() {
+    if (!room) return;
+
     setError(null);
     const guestCount = Number(form.guestCount);
     if (nights < 1) {
@@ -105,7 +107,7 @@ export default function BookingPage() {
       // A brief delay makes the mocked checkout feel like a real authorization step.
       await new Promise((resolve) => window.setTimeout(resolve, 700));
       await createReservation({
-        roomId,
+        roomId: room._id,
         checkIn: form.checkIn,
         checkOut: form.checkOut,
         guestCount,

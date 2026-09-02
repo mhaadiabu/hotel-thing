@@ -9,7 +9,6 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { api } from "@hotel/backend/convex/_generated/api";
-import type { Id } from "@hotel/backend/convex/_generated/dataModel";
 import { Badge } from "@hotel/ui/components/badge";
 import { Button } from "@hotel/ui/components/button";
 import { Skeleton } from "@hotel/ui/components/skeleton";
@@ -26,7 +25,7 @@ import { getRoomPresentation } from "@/lib/rooms";
 export default function RoomDetailsPage() {
   const params = useParams<{ roomId: string }>();
   const room = useQuery(api.rooms.getAvailable, {
-    roomId: params.roomId as Id<"rooms">,
+    roomId: params.roomId,
   });
 
   return (
