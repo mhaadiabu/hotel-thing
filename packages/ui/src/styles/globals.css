@@ -32,6 +32,15 @@
   --sidebar-border: oklch(0.9 0.012 160);
   --sidebar-ring: oklch(0.52 0.07 162);
   --radius: 0.75rem;
+  --duration-quick: 150ms;
+  --duration-fast: 250ms;
+  --duration-medium: 350ms;
+  --duration-slow: 400ms;
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --scale-large: 0.96;
+  --scale-medium: 0.97;
+  --scale-small: 0.98;
+  --scale-tiny: 0.99;
   --chart-1: oklch(0.88 0.011 106.6);
   --chart-2: oklch(0.58 0.031 107.3);
   --chart-3: oklch(0.466 0.025 107.3);
@@ -126,5 +135,24 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="sheet-content"] {
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="dialog-content"],
+  [data-slot="select-content"],
+  [data-slot="tooltip-content"] {
+    --tw-enter-scale: 1 !important;
+    --tw-exit-scale: 1 !important;
+    --tw-enter-translate-x: 0 !important;
+    --tw-enter-translate-y: 0 !important;
+    --tw-exit-translate-x: 0 !important;
+    --tw-exit-translate-y: 0 !important;
   }
 }
