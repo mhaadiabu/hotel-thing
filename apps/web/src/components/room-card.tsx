@@ -14,7 +14,7 @@ export function RoomCard({ room }: { room: PublicRoom }) {
   const details = getRoomPresentation(room);
 
   return (
-    <Card className="group gap-0 overflow-hidden py-0 shadow-sm transition-transform duration-300 hover:-translate-y-1">
+    <Card className="group gap-0 overflow-hidden py-0 shadow-sm">
       <RoomImage
         roomName={details.name}
         imageUrls={room.imageUrls}
