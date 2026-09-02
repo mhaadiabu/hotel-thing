@@ -102,7 +102,7 @@ export default function AdminPage() {
     } catch (cause) {
       setActionError(cause instanceof Error ? cause.message : "The room status could not be updated.");
     } finally {
-      setStatusPendingId(null);
+      setStatusPendingId((current) => (current === roomId ? null : current));
     }
   }
 

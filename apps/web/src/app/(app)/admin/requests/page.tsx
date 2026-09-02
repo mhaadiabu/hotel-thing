@@ -59,7 +59,7 @@ export default function RequestsPage() {
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "The request status could not be updated.");
     } finally {
-      setPendingRequestId(null);
+      setPendingRequestId((current) => (current === requestId ? null : current));
     }
   }
 

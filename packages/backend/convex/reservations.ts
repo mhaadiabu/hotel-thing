@@ -108,14 +108,28 @@ export const create = mutation({
       });
     }
 
-    const existing = await ctx.db
+    const priorReservation = await ctx.db
       .query("reservations")
-      .withIndex("by_room_and_checkIn", (q) =>
-        q.eq("roomId", args.roomId).lt("checkIn", args.checkOut),
+      .withIndex("by_room_status_and_checkIn", (q) =>
+        q
+          .eq("roomId", args.roomId)
+          .eq("status", "confirmed")
+          .lt("checkIn", args.checkIn),
+      )
+      .order("desc")
+      .first();
+    const upcomingReservations = await ctx.db
+      .query("reservations")
+      .withIndex("by_room_status_and_checkIn", (q) =>
+        q
+          .eq("roomId", args.roomId)
+          .eq("status", "confirmed")
+          .gte("checkIn", args.checkIn)
+          .lt("checkIn", args.checkOut),
       )
       .collect();
-    const overlaps = existing.some((reservation) => {
-      if (reservation.status === "cancelled") return false;
+    const overlaps = [priorReservation, ...upcomingReservations].some((reservation) => {
+      if (!reservation) return false;
       return args.checkIn < reservation.checkOut && args.checkOut > reservation.checkIn;
     });
 
