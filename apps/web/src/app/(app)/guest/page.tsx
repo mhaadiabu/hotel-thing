@@ -64,7 +64,7 @@ function GuestHome() {
             <p className="text-sm text-muted-foreground">
               Browse the available rooms and choose one for your next visit.
             </p>
-            <Button className="mt-6" render={<Link href="/rooms" />}>
+            <Button className="mt-6" nativeButton={false} render={<Link href="/stay" />}>
               Find a room
             </Button>
           </CardContent>

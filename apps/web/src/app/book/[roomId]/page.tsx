@@ -69,7 +69,7 @@ export default function BookingPage() {
         <PublicHeader />
         <div className="mx-auto flex min-h-[70dvh] max-w-lg flex-col items-center justify-center px-4 text-center">
           <h1 className="font-heading text-3xl font-semibold">This room is no longer available</h1>
-          <Button className="mt-6" render={<Link href={"/stay" as Route} />}>
+          <Button className="mt-6" nativeButton={false} render={<Link href={"/stay" as Route} />}>
             Browse rooms
           </Button>
         </div>
