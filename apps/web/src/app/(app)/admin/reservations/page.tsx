@@ -73,8 +73,8 @@ export default function ReservationsPage() {
                       </TableCell>
                       <TableCell>
                         {payment ? (
-                          <Badge variant="secondary" className="capitalize">
-                            {payment.method.replace("_", " ")}
+                          <Badge variant="secondary">
+                            Mock paid · {payment.method.replace("_", " ")}
                           </Badge>
                         ) : (
                           <span className="text-muted-foreground">Legacy booking</span>

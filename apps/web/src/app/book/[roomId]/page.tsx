@@ -144,6 +144,7 @@ export default function BookingPage() {
                 <Input
                   id="checkIn"
                   type="date"
+                  disabled={pending}
                   value={form.checkIn}
                   onChange={(event) =>
                     setForm((current) => ({ ...current, checkIn: event.target.value }))
@@ -155,6 +156,7 @@ export default function BookingPage() {
                 <Input
                   id="checkOut"
                   type="date"
+                  disabled={pending}
                   value={form.checkOut}
                   onChange={(event) =>
                     setForm((current) => ({ ...current, checkOut: event.target.value }))
@@ -169,6 +171,7 @@ export default function BookingPage() {
                 type="number"
                 min="1"
                 max={details.capacity}
+                disabled={pending}
                 value={form.guestCount}
                 onChange={(event) =>
                   setForm((current) => ({ ...current, guestCount: event.target.value }))
@@ -207,8 +210,9 @@ export default function BookingPage() {
                 <button
                   type="button"
                   aria-pressed={paymentMethod === "card"}
+                  disabled={pending}
                   onClick={() => setPaymentMethod("card")}
-                  className="flex items-center gap-2 rounded-lg border px-3 py-3 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30 aria-pressed:border-primary aria-pressed:bg-primary/5"
+                  className="flex items-center gap-2 rounded-lg border px-3 py-3 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:border-primary aria-pressed:bg-primary/5"
                 >
                   <CreditCard className="size-4" aria-hidden="true" />
                   Card
@@ -216,8 +220,9 @@ export default function BookingPage() {
                 <button
                   type="button"
                   aria-pressed={paymentMethod === "mobile_money"}
+                  disabled={pending}
                   onClick={() => setPaymentMethod("mobile_money")}
-                  className="flex items-center gap-2 rounded-lg border px-3 py-3 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30 aria-pressed:border-primary aria-pressed:bg-primary/5"
+                  className="flex items-center gap-2 rounded-lg border px-3 py-3 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:border-primary aria-pressed:bg-primary/5"
                 >
                   <Smartphone className="size-4" aria-hidden="true" />
                   Mobile money
@@ -233,6 +238,7 @@ export default function BookingPage() {
                       inputMode="numeric"
                       autoComplete="cc-number"
                       placeholder="4242 4242 4242 4242"
+                      disabled={pending}
                       value={payment.cardNumber}
                       onChange={(event) =>
                         setPayment((current) => ({ ...current, cardNumber: event.target.value }))
@@ -246,6 +252,7 @@ export default function BookingPage() {
                       inputMode="numeric"
                       autoComplete="cc-exp"
                       placeholder="MM / YY"
+                      disabled={pending}
                       value={payment.expiry}
                       onChange={(event) =>
                         setPayment((current) => ({ ...current, expiry: event.target.value }))
@@ -259,6 +266,7 @@ export default function BookingPage() {
                       inputMode="numeric"
                       autoComplete="cc-csc"
                       placeholder="123"
+                      disabled={pending}
                       value={payment.cvc}
                       onChange={(event) =>
                         setPayment((current) => ({ ...current, cvc: event.target.value }))
@@ -274,6 +282,7 @@ export default function BookingPage() {
                     inputMode="tel"
                     autoComplete="tel"
                     placeholder="024 123 4567"
+                    disabled={pending}
                     value={payment.phone}
                     onChange={(event) =>
                       setPayment((current) => ({ ...current, phone: event.target.value }))

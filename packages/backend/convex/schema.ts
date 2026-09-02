@@ -42,7 +42,7 @@ export default defineSchema({
     guestTokenIdentifier: v.string(),
     amount: v.number(),
     method: v.union(v.literal("card"), v.literal("mobile_money")),
-    status: v.literal("succeeded"),
+    status: v.literal("mock_succeeded"),
     createdAt: v.number(),
   }).index("by_reservationId", ["reservationId"]),
   serviceRequests: defineTable({

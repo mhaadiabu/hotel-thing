@@ -32,7 +32,7 @@ const paymentValidator = v.object({
   guestTokenIdentifier: v.string(),
   amount: v.number(),
   method: paymentMethod,
-  status: v.literal("succeeded"),
+  status: v.literal("mock_succeeded"),
   createdAt: v.number(),
 });
 
@@ -114,7 +114,7 @@ export const create = mutation({
       guestTokenIdentifier: identity.tokenIdentifier,
       amount: totalAmount,
       method: args.paymentMethod,
-      status: "succeeded",
+      status: "mock_succeeded",
       createdAt,
     });
     return reservationId;

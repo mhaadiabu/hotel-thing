@@ -141,7 +141,9 @@ function RequestStatusDot({ status }: { status: (typeof STATUSES)[number] }) {
   return (
     <span className="relative flex size-2.5 shrink-0" aria-label={STATUS_LABELS[status]}>
       {isActive ? (
-        <span className={`absolute inset-0 animate-ping rounded-full opacity-60 ${dot}`} />
+        <span
+          className={`absolute inset-0 motion-safe:animate-ping rounded-full opacity-60 ${dot}`}
+        />
       ) : null}
       <span className={`relative size-2.5 rounded-full ring-2 ring-background ${dot}`} />
     </span>
