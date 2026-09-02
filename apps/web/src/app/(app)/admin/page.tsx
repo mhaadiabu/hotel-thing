@@ -69,7 +69,8 @@ export default function AdminPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [statusPendingId, setStatusPendingId] = useState<Id<"rooms"> | null>(null);
   const [deletePending, setDeletePending] = useState(false);
-  const [actionError, setActionError] = useState<string | null>(null);
+  const [statusError, setStatusError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     const urls = files.map((file) => URL.createObjectURL(file));
@@ -96,11 +97,11 @@ export default function AdminPage() {
 
   async function handleStatusChange(roomId: Id<"rooms">, status: Status) {
     setStatusPendingId(roomId);
-    setActionError(null);
+    setStatusError(null);
     try {
       await updateStatus({ roomId, status });
     } catch (cause) {
-      setActionError(cause instanceof Error ? cause.message : "The room status could not be updated.");
+      setStatusError(cause instanceof Error ? cause.message : "The room status could not be updated.");
     } finally {
       setStatusPendingId((current) => (current === roomId ? null : current));
     }
@@ -110,12 +111,12 @@ export default function AdminPage() {
     if (!roomToDelete) return;
 
     setDeletePending(true);
-    setActionError(null);
+    setDeleteError(null);
     try {
       await removeRoom({ roomId: roomToDelete._id });
       setDeleteId(null);
     } catch (cause) {
-      setActionError(cause instanceof Error ? cause.message : "The room could not be deleted.");
+      setDeleteError(cause instanceof Error ? cause.message : "The room could not be deleted.");
     } finally {
       setDeletePending(false);
     }
@@ -223,7 +224,7 @@ export default function AdminPage() {
       </div>
 
       <div className="mt-8">
-        {actionError ? <p role="alert" className="mb-4 text-sm text-destructive">{actionError}</p> : null}
+        {statusError ? <p role="alert" className="mb-4 text-sm text-destructive">{statusError}</p> : null}
         {rooms === undefined ? <Skeleton className="h-64 w-full" /> : rooms.length === 0 ? (
           <Card className="border-dashed shadow-none">
             <Empty className="min-h-64">
@@ -258,7 +259,7 @@ export default function AdminPage() {
                           <SelectContent><SelectGroup>{STATUSES.map((status) => <SelectItem key={status} value={status}>{status}</SelectItem>)}</SelectGroup></SelectContent>
                         </Select>
                       </TableCell>
-                      <TableCell className="text-right"><Button variant="ghost" size="icon-sm" aria-label={`Delete room ${room.roomNumber}`} onClick={() => { setActionError(null); setDeleteId(room._id); }}><HugeiconsIcon icon={Delete02Icon} /></Button></TableCell>
+                      <TableCell className="text-right"><Button variant="ghost" size="icon-sm" aria-label={`Delete room ${room.roomNumber}`} onClick={() => { setDeleteError(null); setDeleteId(room._id); }}><HugeiconsIcon icon={Delete02Icon} /></Button></TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -268,10 +269,10 @@ export default function AdminPage() {
         )}
       </div>
 
-      <Dialog open={deleteId !== null} onOpenChange={(value) => { if (!value && !deletePending) { setDeleteId(null); setActionError(null); } }}>
+      <Dialog open={deleteId !== null} onOpenChange={(value) => { if (!value && !deletePending) { setDeleteId(null); setDeleteError(null); } }}>
         <DialogContent>
           <DialogHeader><DialogTitle>Delete room {roomToDelete?.roomNumber}?</DialogTitle><DialogDescription>This removes the room and its uploaded images. Existing reservation records remain available.</DialogDescription></DialogHeader>
-          {actionError ? <p role="alert" className="text-sm text-destructive">{actionError}</p> : null}
+          {deleteError ? <p role="alert" className="text-sm text-destructive">{deleteError}</p> : null}
           <DialogFooter><DialogClose render={<Button variant="outline" disabled={deletePending} />}>Cancel</DialogClose><Button variant="destructive" disabled={deletePending} onClick={() => void handleDelete()}>{deletePending ? "Deleting..." : "Delete room"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>

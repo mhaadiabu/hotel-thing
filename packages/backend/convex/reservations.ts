@@ -38,6 +38,7 @@ const paymentValidator = v.object({
 });
 
 const CALENDAR_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const MAX_STAY_NIGHTS = 30;
 
 function parseCalendarDate(value: string): number | null {
   if (!CALENDAR_DATE_PATTERN.test(value)) return null;
@@ -101,6 +102,13 @@ export const create = mutation({
 
     const nights = (checkOutTime - checkInTime) / 86_400_000;
 
+    if (nights > MAX_STAY_NIGHTS) {
+      throw new ConvexError({
+        code: "STAY_TOO_LONG",
+        message: `A reservation can be up to ${MAX_STAY_NIGHTS} nights.`,
+      });
+    }
+
     if (!Number.isInteger(args.guestCount) || args.guestCount < 1 || args.guestCount > capacity) {
       throw new ConvexError({
         code: "INVALID_GUEST_COUNT",
@@ -108,17 +116,21 @@ export const create = mutation({
       });
     }
 
-    const priorReservation = await ctx.db
+    const earliestPossibleCheckIn = new Date(
+      checkInTime - MAX_STAY_NIGHTS * 86_400_000,
+    ).toISOString().slice(0, 10);
+    const priorReservations = await ctx.db
       .query("reservations")
       .withIndex("by_room_status_and_checkIn", (q) =>
         q
           .eq("roomId", args.roomId)
           .eq("status", "confirmed")
+          .gte("checkIn", earliestPossibleCheckIn)
           .lt("checkIn", args.checkIn),
       )
       .order("desc")
-      .first();
-    const upcomingReservations = await ctx.db
+      .collect();
+    const upcomingReservation = await ctx.db
       .query("reservations")
       .withIndex("by_room_status_and_checkIn", (q) =>
         q
@@ -127,8 +139,8 @@ export const create = mutation({
           .gte("checkIn", args.checkIn)
           .lt("checkIn", args.checkOut),
       )
-      .collect();
-    const overlaps = [priorReservation, ...upcomingReservations].some((reservation) => {
+      .first();
+    const overlaps = [...priorReservations, upcomingReservation].some((reservation) => {
       if (!reservation) return false;
       return args.checkIn < reservation.checkOut && args.checkOut > reservation.checkIn;
     });
