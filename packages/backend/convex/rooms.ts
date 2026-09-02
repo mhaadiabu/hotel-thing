@@ -2,6 +2,7 @@ import { ConvexError, v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import { mutation, query, type QueryCtx } from "./_generated/server";
 import { requireRole } from "./lib/auth";
+import { inferRoomCapacity } from "./lib/rooms";
 
 export const generateUploadUrl = mutation({
   args: {},
@@ -118,7 +119,7 @@ export const create = mutation({
       nightlyRate: args.nightlyRate,
       name: args.name,
       description: args.description,
-      capacity: args.capacity,
+      capacity: args.capacity ?? inferRoomCapacity(args.type),
       bedType: args.bedType,
       sizeSqm: args.sizeSqm,
       amenities: args.amenities,

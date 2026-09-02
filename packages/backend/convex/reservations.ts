@@ -2,6 +2,7 @@ import { ConvexError, v } from "convex/values";
 
 import { mutation, query } from "./_generated/server";
 import { requireAuth, requireRole } from "./lib/auth";
+import { inferRoomCapacity } from "./lib/rooms";
 
 const reservationStatus = v.union(
   v.literal("confirmed"),
@@ -75,7 +76,7 @@ export const create = mutation({
 
     const checkInTime = parseCalendarDate(args.checkIn);
     const checkOutTime = parseCalendarDate(args.checkOut);
-    const capacity = room.capacity ?? 2;
+    const capacity = room.capacity ?? inferRoomCapacity(room.type);
 
     if (checkInTime === null || checkOutTime === null) {
       throw new ConvexError({
