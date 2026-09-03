@@ -3,10 +3,11 @@
 import { useUser } from "@clerk/nextjs";
 import { api } from "@hotel/backend/convex/_generated/api";
 import type { Id } from "@hotel/backend/convex/_generated/dataModel";
+import { Badge } from "@hotel/ui/components/badge";
 import { Button } from "@hotel/ui/components/button";
 import { Card, CardContent, CardFooter } from "@hotel/ui/components/card";
 import { Skeleton } from "@hotel/ui/components/skeleton";
-import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
+import { CheckmarkCircle02Icon, Clock03Icon, Loading03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
@@ -18,6 +19,10 @@ import { getAppError } from "@/lib/app-error";
 import { formatDateTime } from "@/lib/format";
 
 type StaffRequestRow = FunctionReturnType<typeof api.serviceRequests.listForStaff>[number];
+type PendingAction = {
+  requestId: Id<"serviceRequests">;
+  action: "start" | "complete";
+};
 
 const CATEGORY_LABELS = {
   housekeeping: "Housekeeping",
@@ -37,22 +42,35 @@ export default function StaffPage() {
 function StaffHome() {
   const { user } = useUser();
   const rows = useQuery(api.serviceRequests.listForStaff);
+  const startRequest = useMutation(api.serviceRequests.start);
   const completeRequest = useMutation(api.serviceRequests.complete);
-  const [pendingRequestId, setPendingRequestId] = useState<Id<"serviceRequests"> | null>(null);
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const activeRows = rows?.filter(({ request }) => request.status !== "resolved");
   const completedRows = rows?.filter(({ request }) => request.status === "resolved");
 
+  async function handleStart(requestId: Id<"serviceRequests">) {
+    setPendingAction({ requestId, action: "start" });
+    setError(null);
+    try {
+      await startRequest({ requestId });
+    } catch (cause) {
+      setError(getAppError(cause, "The request could not be started. Try again.").message);
+    } finally {
+      setPendingAction((current) => (current?.requestId === requestId ? null : current));
+    }
+  }
+
   async function handleComplete(requestId: Id<"serviceRequests">) {
-    setPendingRequestId(requestId);
+    setPendingAction({ requestId, action: "complete" });
     setError(null);
     try {
       await completeRequest({ requestId });
     } catch (cause) {
       setError(getAppError(cause, "The request could not be completed. Try again.").message);
     } finally {
-      setPendingRequestId((current) => (current === requestId ? null : current));
+      setPendingAction((current) => (current?.requestId === requestId ? null : current));
     }
   }
 
@@ -70,7 +88,11 @@ function StaffHome() {
 
       <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-8 sm:py-8">
         {error ? (
-          <InlineAlert className="mb-6" title="The request was not completed" description={error} />
+          <InlineAlert
+            className="mb-6"
+            title="The request status was not updated"
+            description={error}
+          />
         ) : null}
 
         {rows === undefined ? (
@@ -86,7 +108,7 @@ function StaffHome() {
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 {activeRows?.length
-                  ? `${activeRows.length} ${activeRows.length === 1 ? "request" : "requests"} waiting`
+                  ? `${activeRows.length} active ${activeRows.length === 1 ? "request" : "requests"}`
                   : "No requests are waiting."}
               </p>
 
@@ -96,7 +118,10 @@ function StaffHome() {
                     <RequestCard
                       key={row.request._id}
                       row={row}
-                      pending={pendingRequestId === row.request._id}
+                      pendingAction={
+                        pendingAction?.requestId === row.request._id ? pendingAction.action : null
+                      }
+                      onStart={handleStart}
                       onComplete={handleComplete}
                     />
                   ))}
@@ -134,22 +159,36 @@ function StaffHome() {
 
 function RequestCard({
   row,
-  pending,
+  pendingAction,
+  onStart,
   onComplete,
 }: {
   row: StaffRequestRow;
-  pending: boolean;
+  pendingAction: PendingAction["action"] | null;
+  onStart: (requestId: Id<"serviceRequests">) => Promise<void>;
   onComplete: (requestId: Id<"serviceRequests">) => Promise<void>;
 }) {
   const { request, reservation, roomNumber } = row;
+  const isInProgress = request.status === "in_progress";
 
   return (
     <Card className="shadow-sm">
       <CardContent>
-        <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          <span>{roomNumber ? `Room ${roomNumber}` : "Room unavailable"}</span>
-          <span aria-hidden>·</span>
-          <span>{CATEGORY_LABELS[request.category]}</span>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <span>{roomNumber ? `Room ${roomNumber}` : "Room unavailable"}</span>
+            <span aria-hidden>·</span>
+            <span>{CATEGORY_LABELS[request.category]}</span>
+          </div>
+          {isInProgress ? (
+            <Badge
+              className="bg-amber-500/12 text-amber-800 dark:text-amber-300"
+              variant="secondary"
+            >
+              <span className="size-1.5 rounded-full bg-amber-500" aria-hidden="true" />
+              In progress
+            </Badge>
+          ) : null}
         </div>
         <p className="mt-4 break-words text-base leading-7">{request.details}</p>
         <div className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -161,11 +200,28 @@ function RequestCard({
         <Button
           type="button"
           className="min-h-11 w-full sm:ml-auto sm:w-auto"
-          disabled={pending}
-          onClick={() => void onComplete(request._id)}
+          disabled={pendingAction !== null}
+          onClick={() => void (isInProgress ? onComplete(request._id) : onStart(request._id))}
         >
-          <HugeiconsIcon icon={CheckmarkCircle02Icon} aria-hidden data-icon="inline-start" />
-          {pending ? "Marking complete…" : "Mark complete"}
+          <HugeiconsIcon
+            icon={
+              pendingAction !== null
+                ? Loading03Icon
+                : isInProgress
+                  ? CheckmarkCircle02Icon
+                  : Clock03Icon
+            }
+            className={pendingAction !== null ? "animate-spin" : undefined}
+            aria-hidden
+            data-icon="inline-start"
+          />
+          {pendingAction === "start"
+            ? "Starting…"
+            : pendingAction === "complete"
+              ? "Marking complete…"
+              : isInProgress
+                ? "Mark complete"
+                : "Mark in progress"}
         </Button>
       </CardFooter>
     </Card>

@@ -171,6 +171,22 @@ export const listForStaff = query({
   },
 });
 
+export const start = mutation({
+  args: { requestId: v.id("serviceRequests") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin", "staff"]);
+    const request = await ctx.db.get("serviceRequests", args.requestId);
+    if (!request) {
+      throw new ConvexError({ code: "REQUEST_NOT_FOUND", message: "Request not found." });
+    }
+    if (request.status !== "open") return null;
+
+    await ctx.db.patch("serviceRequests", args.requestId, { status: "in_progress" });
+    return null;
+  },
+});
+
 export const complete = mutation({
   args: { requestId: v.id("serviceRequests") },
   returns: v.null(),
