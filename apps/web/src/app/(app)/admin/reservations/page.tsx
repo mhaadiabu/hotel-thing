@@ -18,7 +18,11 @@ import { formatDate, formatGHS } from "@/lib/format";
 import { calculateNights } from "@/lib/rooms";
 
 export default function ReservationsPage() {
-  const rows = useQuery(api.reservations.listForAdmin);
+  const me = useQuery(api.users.me);
+  const rows = useQuery(
+    me?.role === "admin" ? api.reservations.listForAdmin : api.reservations.listForStaff,
+    me ? {} : "skip",
+  );
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       <p className="text-xs font-medium uppercase text-muted-foreground">Bookings</p>

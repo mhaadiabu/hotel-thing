@@ -261,3 +261,42 @@ export const listForAdmin = query({
     );
   },
 });
+
+export const listForStaff = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      reservation: reservationValidator,
+      payment: v.union(paymentValidator, v.null()),
+      room: v.union(
+        v.object({
+          _id: v.id("rooms"),
+          roomNumber: v.string(),
+          type: v.string(),
+          name: v.optional(v.string()),
+        }),
+        v.null(),
+      ),
+    }),
+  ),
+  handler: async (ctx) => {
+    await requireRole(ctx, ["admin", "staff"]);
+    const reservations = await ctx.db.query("reservations").order("desc").take(200);
+    return await Promise.all(
+      reservations.map(async (reservation) => {
+        const room = await ctx.db.get("rooms", reservation.roomId);
+        const payment = await ctx.db
+          .query("payments")
+          .withIndex("by_reservationId", (q) => q.eq("reservationId", reservation._id))
+          .unique();
+        return {
+          reservation,
+          payment,
+          room: room
+            ? { _id: room._id, roomNumber: room.roomNumber, type: room.type, name: room.name }
+            : null,
+        };
+      }),
+    );
+  },
+});

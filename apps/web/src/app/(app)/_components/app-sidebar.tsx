@@ -5,9 +5,11 @@ import { api } from "@hotel/backend/convex/_generated/api";
 import { roleHomePath, roleLabel, type Role } from "@hotel/backend/convex/lib/roles";
 import {
   BedIcon,
+  Calendar03Icon,
   DashboardSquare03Icon,
   Home03Icon,
   Moon02Icon,
+  NoteDoneIcon,
   Sun02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
@@ -35,11 +37,28 @@ import {
   useSidebar,
 } from "@hotel/ui/components/sidebar";
 
-type NavItem = { href: Route; label: string; icon: IconSvgElement };
+type NavItem = { href: Route; label: string; icon: IconSvgElement; roles: readonly Role[] };
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/" as Route, label: "Public site", icon: Home03Icon },
-  { href: "/rooms" as Route, label: "Room inventory", icon: BedIcon },
+  {
+    href: "/" as Route,
+    label: "Public site",
+    icon: Home03Icon,
+    roles: ["guest", "staff", "admin"],
+  },
+  { href: "/rooms" as Route, label: "Room inventory", icon: BedIcon, roles: ["staff", "admin"] },
+  {
+    href: "/admin/reservations" as Route,
+    label: "Reservations",
+    icon: Calendar03Icon,
+    roles: ["staff", "admin"],
+  },
+  {
+    href: "/admin/requests" as Route,
+    label: "Requests",
+    icon: NoteDoneIcon,
+    roles: ["staff", "admin"],
+  },
 ];
 
 function readRole(value: unknown): Role {
@@ -81,19 +100,17 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigate</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.filter((item) => item.href !== "/rooms" || role !== "guest").map(
-                (item) => (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      isActive={pathname === item.href}
-                      render={<Link href={item.href} onClick={() => setOpenMobile(false)} />}
-                    >
-                      <HugeiconsIcon icon={item.icon} aria-hidden strokeWidth={1.8} />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ),
-              )}
+              {NAV_ITEMS.filter((item) => item.roles.includes(role)).map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    isActive={pathname === item.href}
+                    render={<Link href={item.href} onClick={() => setOpenMobile(false)} />}
+                  >
+                    <HugeiconsIcon icon={item.icon} aria-hidden strokeWidth={1.8} />
+                    <span>{item.label}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
               {dashboardHref && dashboardLabel && (
                 <SidebarMenuItem>
                   <SidebarMenuButton

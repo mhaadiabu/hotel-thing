@@ -27,6 +27,7 @@ import { type Role } from "@hotel/backend/convex/lib/roles";
 
 import { InlineAlert } from "@/components/inline-alert";
 import { getAppError } from "@/lib/app-error";
+import { RoleGate } from "@/components/role-gate";
 
 const ROLES = ["admin", "staff", "guest"] as const;
 
@@ -40,6 +41,14 @@ type UserRow = {
 };
 
 export default function RolesPage() {
+  return (
+    <RoleGate allow={["admin"]}>
+      <RolesView />
+    </RoleGate>
+  );
+}
+
+function RolesView() {
   const { user } = useUser();
   const listUsers = useAction(api.roles.list);
   const setUserRole = useAction(api.roles.setRole);

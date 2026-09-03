@@ -49,10 +49,15 @@ const STATUS_STYLES = {
 } as const;
 
 export default function RequestsPage() {
-  const rows = useQuery(api.serviceRequests.listForAdmin);
+  const me = useQuery(api.users.me);
+  const rows = useQuery(
+    me?.role === "admin" ? api.serviceRequests.listForAdmin : api.serviceRequests.listForStaff,
+    me ? {} : "skip",
+  );
   const updateStatus = useMutation(api.serviceRequests.updateStatus);
   const [pendingRequestId, setPendingRequestId] = useState<Id<"serviceRequests"> | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const canEditStatus = me?.role === "admin";
 
   async function handleStatusChange(
     requestId: Id<"serviceRequests">,
@@ -114,13 +119,17 @@ export default function RequestsPage() {
                     <p className="mt-2 break-words leading-6">{request.details}</p>
                   </div>
                   <div className="px-4">
-                    <RequestStatusSelect
-                      requestId={request._id}
-                      status={request.status}
-                      disabled={pendingRequestId === request._id}
-                      onChange={handleStatusChange}
-                      className="w-full"
-                    />
+                    {canEditStatus ? (
+                      <RequestStatusSelect
+                        requestId={request._id}
+                        status={request.status}
+                        disabled={pendingRequestId === request._id}
+                        onChange={handleStatusChange}
+                        className="w-full"
+                      />
+                    ) : (
+                      <RequestStatusBadge status={request.status} />
+                    )}
                     <CompletionReceipt
                       completedByName={request.completedByName}
                       completedAt={request.completedAt}
@@ -161,12 +170,16 @@ export default function RequestsPage() {
                           <p className="min-w-56 max-w-md whitespace-normal">{request.details}</p>
                         </TableCell>
                         <TableCell>
-                          <RequestStatusSelect
-                            requestId={request._id}
-                            status={request.status}
-                            disabled={pendingRequestId === request._id}
-                            onChange={handleStatusChange}
-                          />
+                          {canEditStatus ? (
+                            <RequestStatusSelect
+                              requestId={request._id}
+                              status={request.status}
+                              disabled={pendingRequestId === request._id}
+                              onChange={handleStatusChange}
+                            />
+                          ) : (
+                            <RequestStatusBadge status={request.status} />
+                          )}
                           <CompletionReceipt
                             completedByName={request.completedByName}
                             completedAt={request.completedAt}
@@ -182,6 +195,17 @@ export default function RequestsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function RequestStatusBadge({ status }: { status: (typeof STATUSES)[number] }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-xs font-medium ${STATUS_STYLES[status].control}`}
+    >
+      <span className={`size-2 rounded-full ${STATUS_STYLES[status].dot}`} aria-hidden="true" />
+      {STATUS_LABELS[status]}
+    </span>
   );
 }
 

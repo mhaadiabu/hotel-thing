@@ -50,12 +50,21 @@ import { InlineAlert } from "@/components/inline-alert";
 import { RoomImage } from "@/components/room-image";
 import { getAppError } from "@/lib/app-error";
 import { formatRate } from "@/lib/format";
+import { RoleGate } from "@/components/role-gate";
 
 const STATUSES = ["Available", "Occupied", "Maintenance", "Dirty"] as const;
 type Status = (typeof STATUSES)[number];
 const EMPTY_FORM = { roomNumber: "", type: "", rateGHS: "", name: "" };
 
 export default function AdminPage() {
+  return (
+    <RoleGate allow={["admin"]}>
+      <AdminRoomsPage />
+    </RoleGate>
+  );
+}
+
+function AdminRoomsPage() {
   const rooms = useQuery(api.rooms.list);
   const createRoom = useMutation(api.rooms.create);
   const generateUploadUrl = useMutation(api.rooms.generateUploadUrl);
