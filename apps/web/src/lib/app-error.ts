@@ -9,6 +9,8 @@ const ERROR_MESSAGES = {
   INVALID_GUEST_COUNT: "Choose a guest count that fits this room.",
   PRIMARY_ADMIN: "The primary admin cannot be reassigned.",
   PRIMARY_ADMIN_REQUIRED: "Only the primary admin can manage admin access.",
+  REQUEST_NOT_FOUND:
+    "This request is no longer available. Refresh the page to see the latest list.",
   ROOM_HAS_RESERVATIONS: "This room has an active or upcoming reservation and cannot be deleted.",
   ROOM_NUMBER_EXISTS: "A room with this number already exists. Choose another room number.",
   ROOM_UNAVAILABLE: "This room is no longer available. Choose another room.",

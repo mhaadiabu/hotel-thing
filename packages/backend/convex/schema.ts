@@ -59,6 +59,9 @@ export default defineSchema({
     ),
     details: v.string(),
     status: v.union(v.literal("open"), v.literal("in_progress"), v.literal("resolved")),
+    completedByTokenIdentifier: v.optional(v.string()),
+    completedByName: v.optional(v.string()),
+    completedAt: v.optional(v.number()),
     createdAt: v.number(),
   })
     .index("by_guest", ["guestTokenIdentifier"])

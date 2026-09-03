@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import { api } from "@hotel/backend/convex/_generated/api";
 import type { Id } from "@hotel/backend/convex/_generated/dataModel";
+import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Card } from "@hotel/ui/components/card";
 import {
   Select,
@@ -26,6 +28,7 @@ import { useMutation, useQuery } from "convex/react";
 
 import { InlineAlert } from "@/components/inline-alert";
 import { getAppError } from "@/lib/app-error";
+import { formatDateTime } from "@/lib/format";
 
 const STATUSES = ["open", "in_progress", "resolved"] as const;
 const STATUS_LABELS = { open: "Open", in_progress: "In progress", resolved: "Resolved" } as const;
@@ -118,6 +121,10 @@ export default function RequestsPage() {
                       onChange={handleStatusChange}
                       className="w-full"
                     />
+                    <CompletionReceipt
+                      completedByName={request.completedByName}
+                      completedAt={request.completedAt}
+                    />
                   </div>
                 </Card>
               ))}
@@ -160,6 +167,10 @@ export default function RequestsPage() {
                             disabled={pendingRequestId === request._id}
                             onChange={handleStatusChange}
                           />
+                          <CompletionReceipt
+                            completedByName={request.completedByName}
+                            completedAt={request.completedAt}
+                          />
                         </TableCell>
                       </TableRow>
                     ))}
@@ -170,6 +181,31 @@ export default function RequestsPage() {
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+function CompletionReceipt({
+  completedByName,
+  completedAt,
+}: {
+  completedByName?: string;
+  completedAt?: number;
+}) {
+  if (!completedByName || !completedAt) return null;
+
+  return (
+    <div className="mt-2 flex items-start gap-2 text-xs leading-5 text-muted-foreground">
+      <HugeiconsIcon
+        icon={CheckmarkCircle02Icon}
+        className="mt-0.5 size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"
+        aria-hidden
+        strokeWidth={2}
+      />
+      <span>
+        Completed by <span className="font-medium text-foreground">{completedByName}</span>
+        <span className="block">{formatDateTime(completedAt)}</span>
+      </span>
     </div>
   );
 }

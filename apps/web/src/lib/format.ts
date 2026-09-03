@@ -18,3 +18,10 @@ export function formatDate(calendarDate: string): string {
     timeZone: "UTC",
   }).format(new Date(`${calendarDate}T00:00:00Z`));
 }
+
+export function formatDateTime(timestamp: number): string {
+  return new Intl.DateTimeFormat("en-GH", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(timestamp));
+}
