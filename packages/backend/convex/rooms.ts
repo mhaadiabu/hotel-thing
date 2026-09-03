@@ -112,7 +112,12 @@ export const create = mutation({
       .query("rooms")
       .withIndex("by_roomNumber", (q) => q.eq("roomNumber", args.roomNumber))
       .unique();
-    if (existing) throw new Error(`Room ${args.roomNumber} already exists.`);
+    if (existing) {
+      throw new ConvexError({
+        code: "ROOM_NUMBER_EXISTS",
+        message: "A room with this number already exists.",
+      });
+    }
     return await ctx.db.insert("rooms", {
       roomNumber: args.roomNumber,
       type: args.type,

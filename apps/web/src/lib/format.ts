@@ -9,3 +9,12 @@ export function formatGHS(pesewas: number): string {
 export function formatRate(pesewas: number): string {
   return `${formatGHS(pesewas)} / night`;
 }
+
+export function formatDate(calendarDate: string): string {
+  return new Intl.DateTimeFormat("en-GH", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${calendarDate}T00:00:00Z`));
+}

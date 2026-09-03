@@ -1,6 +1,6 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import { shadcn } from "@clerk/ui/themes";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 import "../index.css";
 import { Geist, Geist_Mono, Nunito_Sans, Raleway } from "next/font/google";
@@ -28,6 +28,15 @@ export const metadata: Metadata = {
     template: "%s | Haven Hotel",
   },
   description: "Browse available rooms and book a comfortable stay at Haven Hotel.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7faf8" },
+    { media: "(prefers-color-scheme: dark)", color: "#17201d" },
+  ],
 };
 
 export default function RootLayout({

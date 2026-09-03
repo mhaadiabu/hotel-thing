@@ -16,13 +16,13 @@ function StaffHome() {
   const { user } = useUser();
   return (
     <>
-      <header className="border-b px-8 py-6">
-        <h1 className="font-heading font-semibold text-2xl tracking-tight">Staff</h1>
+      <header className="border-b px-4 py-5 sm:px-8 sm:py-6">
+        <h1 className="text-balance font-heading text-2xl font-semibold tracking-tight">Staff</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Signed in as {user?.fullName ?? user?.username ?? "staff"}.
         </p>
       </header>
-      <div className="px-8 py-8">
+      <div className="px-4 py-6 sm:px-8 sm:py-8">
         <p className="text-muted-foreground text-sm">
           Reservations, service requests, and room status will appear here.
         </p>

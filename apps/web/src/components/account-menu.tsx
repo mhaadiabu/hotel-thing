@@ -30,6 +30,7 @@ export function AccountMenu({ role, compact = false }: { role?: Role; compact?: 
   const [open, setOpen] = useState(false);
   const [avatarFailed, setAvatarFailed] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -60,7 +61,11 @@ export function AccountMenu({ role, compact = false }: { role?: Role; compact?: 
   if (!isSignedIn || !user) {
     return (
       <SignInButton mode="modal">
-        <Button size="sm" variant="outline" className={compact ? "px-3" : "w-full"}>
+        <Button
+          size="sm"
+          variant={compact ? "outline" : "default"}
+          className={compact ? "h-10 px-3 sm:h-8" : "min-h-11 w-full"}
+        >
           Sign in
         </Button>
       </SignInButton>
@@ -95,7 +100,7 @@ export function AccountMenu({ role, compact = false }: { role?: Role; compact?: 
         onClick={() => setOpen((value) => !value)}
         className={
           compact
-            ? "flex items-center rounded-full outline-none transition-colors hover:opacity-85 focus-visible:ring-2 focus-visible:ring-ring"
+            ? "flex size-11 items-center justify-center rounded-full outline-none transition-colors hover:opacity-85 focus-visible:ring-2 focus-visible:ring-ring sm:size-9"
             : "group flex w-full items-center gap-3 rounded-xl p-2 text-left outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring"
         }
       >
@@ -124,7 +129,7 @@ export function AccountMenu({ role, compact = false }: { role?: Role; compact?: 
           aria-label="Account actions"
           className={
             compact
-              ? "absolute right-0 top-[calc(100%+0.5rem)] z-30 w-56 rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-lg"
+              ? "absolute right-0 top-[calc(100%+0.5rem)] z-30 w-[min(14rem,calc(100vw-2rem))] rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-lg"
               : "absolute bottom-[calc(100%+0.5rem)] left-0 z-30 w-64 rounded-xl border border-sidebar-border bg-popover p-1.5 text-popover-foreground shadow-lg group-data-[collapsible=icon]:left-0"
           }
         >
@@ -138,13 +143,22 @@ export function AccountMenu({ role, compact = false }: { role?: Role; compact?: 
             disabled={signingOut}
             onClick={() => {
               setSigningOut(true);
-              void signOut({ redirectUrl: "/" }).catch(() => setSigningOut(false));
+              setSignOutError(false);
+              void signOut({ redirectUrl: "/" }).catch(() => {
+                setSigningOut(false);
+                setSignOutError(true);
+              });
             }}
             className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive outline-none transition-colors hover:bg-destructive/10 focus-visible:bg-destructive/10 disabled:cursor-wait disabled:opacity-60"
           >
             <HugeiconsIcon icon={Logout03Icon} aria-hidden strokeWidth={1.8} />
-            {signingOut ? "Signing out..." : "Sign out"}
+            {signingOut ? "Signing out…" : "Sign out"}
           </button>
+          {signOutError ? (
+            <p role="alert" aria-live="polite" className="px-3 py-2 text-xs text-destructive">
+              Sign out failed. Check your connection and try again.
+            </p>
+          ) : null}
         </div>
       )}
     </div>

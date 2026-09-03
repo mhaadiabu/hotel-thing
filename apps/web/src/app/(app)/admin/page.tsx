@@ -46,7 +46,9 @@ import {
   TableRow,
 } from "@hotel/ui/components/table";
 
+import { InlineAlert } from "@/components/inline-alert";
 import { RoomImage } from "@/components/room-image";
+import { getAppError } from "@/lib/app-error";
 import { formatRate } from "@/lib/format";
 
 const STATUSES = ["Available", "Occupied", "Maintenance", "Dirty"] as const;
@@ -101,7 +103,9 @@ export default function AdminPage() {
     try {
       await updateStatus({ roomId, status });
     } catch (cause) {
-      setStatusError(cause instanceof Error ? cause.message : "The room status could not be updated.");
+      setStatusError(
+        getAppError(cause, "The room status could not be updated. Try again.").message,
+      );
     } finally {
       setStatusPendingId((current) => (current === roomId ? null : current));
     }
@@ -116,7 +120,7 @@ export default function AdminPage() {
       await removeRoom({ roomId: roomToDelete._id });
       setDeleteId(null);
     } catch (cause) {
-      setDeleteError(cause instanceof Error ? cause.message : "The room could not be deleted.");
+      setDeleteError(getAppError(cause, "The room could not be deleted. Try again.").message);
     } finally {
       setDeletePending(false);
     }
@@ -154,8 +158,16 @@ export default function AdminPage() {
       reset();
       setOpen(false);
     } catch (cause) {
-      if (uploaded.length) await discardUploads({ storageIds: uploaded as never[] });
-      setError(cause instanceof Error ? cause.message : "The room could not be added.");
+      if (uploaded.length) {
+        try {
+          await discardUploads({ storageIds: uploaded as never[] });
+        } catch {
+          // The room creation error remains the useful failure for the admin to act on.
+        }
+      }
+      setError(
+        getAppError(cause, "The room could not be added. Check the details and try again.").message,
+      );
     } finally {
       setPending(false);
     }
@@ -166,14 +178,20 @@ export default function AdminPage() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+        <div className="min-w-0">
           <p className="text-xs font-medium uppercase text-muted-foreground">Inventory</p>
-          <h1 className="mt-1 font-heading text-3xl font-semibold">Rooms</h1>
+          <h1 className="mt-1 text-balance font-heading text-3xl font-semibold">Rooms</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Manage availability, pricing, and room photography.
           </p>
         </div>
-        <Dialog open={open} onOpenChange={(value) => { setOpen(value); if (!value) reset(); }}>
+        <Dialog
+          open={open}
+          onOpenChange={(value) => {
+            setOpen(value);
+            if (!value) reset();
+          }}
+        >
           <DialogTrigger render={<Button />}>
             <HugeiconsIcon icon={Add01Icon} data-icon="inline-start" />
             Add room
@@ -181,99 +199,304 @@ export default function AdminPage() {
           <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>Add a room</DialogTitle>
-              <DialogDescription>Add the essentials now. You can manage its status afterward.</DialogDescription>
+              <DialogDescription>
+                Add the essentials now. You can manage its status afterward.
+              </DialogDescription>
             </DialogHeader>
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="flex flex-col gap-2">
                 <Label htmlFor="roomNumber">Room number</Label>
-                <Input id="roomNumber" value={form.roomNumber} onChange={(event) => setForm((value) => ({ ...value, roomNumber: event.target.value }))} />
+                <Input
+                  id="roomNumber"
+                  name="roomNumber"
+                  value={form.roomNumber}
+                  onChange={(event) =>
+                    setForm((value) => ({ ...value, roomNumber: event.target.value }))
+                  }
+                />
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="type">Room type</Label>
-                <Input id="type" placeholder="Deluxe king" value={form.type} onChange={(event) => setForm((value) => ({ ...value, type: event.target.value }))} />
+                <Input
+                  id="type"
+                  name="roomType"
+                  placeholder="Deluxe king"
+                  value={form.type}
+                  onChange={(event) => setForm((value) => ({ ...value, type: event.target.value }))}
+                />
               </div>
               <div className="flex flex-col gap-2 sm:col-span-2">
-                <Label htmlFor="name">Display name <span className="text-muted-foreground">(optional)</span></Label>
-                <Input id="name" placeholder="Garden suite" value={form.name} onChange={(event) => setForm((value) => ({ ...value, name: event.target.value }))} />
+                <Label htmlFor="name">
+                  Display name <span className="text-muted-foreground">(optional)</span>
+                </Label>
+                <Input
+                  id="name"
+                  name="displayName"
+                  placeholder="Garden suite"
+                  value={form.name}
+                  onChange={(event) => setForm((value) => ({ ...value, name: event.target.value }))}
+                />
               </div>
               <div className="flex flex-col gap-2 sm:col-span-2">
                 <Label htmlFor="rate">Nightly rate (GHS)</Label>
-                <Input id="rate" type="number" inputMode="decimal" step="0.01" min="0" value={form.rateGHS} onChange={(event) => setForm((value) => ({ ...value, rateGHS: event.target.value }))} />
+                <Input
+                  id="rate"
+                  name="nightlyRate"
+                  type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  min="0"
+                  value={form.rateGHS}
+                  onChange={(event) =>
+                    setForm((value) => ({ ...value, rateGHS: event.target.value }))
+                  }
+                />
               </div>
               <div className="flex flex-col gap-2 sm:col-span-2">
-                <Label htmlFor="images">Room images <span className="text-muted-foreground">(up to 5)</span></Label>
-                <label htmlFor="images" className="flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed bg-muted/40 px-4 text-center text-sm text-muted-foreground hover:bg-muted">
+                <Label htmlFor="images">
+                  Room images <span className="text-muted-foreground">(up to 5)</span>
+                </Label>
+                <label
+                  htmlFor="images"
+                  className="flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed bg-muted/40 px-4 text-center text-sm text-muted-foreground hover:bg-muted"
+                >
                   <HugeiconsIcon icon={Image01Icon} />
                   <span>Choose JPG, PNG, or WebP images</span>
                 </label>
-                <Input id="images" type="file" accept="image/*" multiple className="sr-only" onChange={(event) => chooseFiles(event.target.files)} />
+                <Input
+                  id="images"
+                  name="roomImages"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="sr-only"
+                  onChange={(event) => chooseFiles(event.target.files)}
+                />
                 {previews.length > 0 ? (
                   <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-                    {previews.map((src, index) => <RoomImage key={src} roomName={`Selected room image ${index + 1}`} imageUrls={[src]} className="min-h-20" />)}
+                    {previews.map((src, index) => (
+                      <RoomImage
+                        key={src}
+                        roomName={`Selected room image ${index + 1}`}
+                        imageUrls={[src]}
+                        className="min-h-20"
+                      />
+                    ))}
                   </div>
                 ) : null}
               </div>
             </div>
-            {error ? <p className="text-sm text-destructive">{error}</p> : null}
+            {error ? <InlineAlert title="The room was not added" description={error} /> : null}
             <DialogFooter>
-              <DialogClose render={<Button variant="outline" disabled={pending} />}>Cancel</DialogClose>
-              <Button onClick={handleCreate} disabled={pending}>{pending ? "Adding room..." : "Add room"}</Button>
+              <DialogClose render={<Button variant="outline" disabled={pending} />}>
+                Cancel
+              </DialogClose>
+              <Button onClick={handleCreate} disabled={pending}>
+                {pending ? "Adding room…" : "Add room"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
 
       <div className="mt-8">
-        {statusError ? <p role="alert" className="mb-4 text-sm text-destructive">{statusError}</p> : null}
-        {rooms === undefined ? <Skeleton className="h-64 w-full" /> : rooms.length === 0 ? (
+        {statusError ? (
+          <InlineAlert
+            className="mb-4"
+            title="The room status was not updated"
+            description={statusError}
+          />
+        ) : null}
+        {rooms === undefined ? (
+          <Skeleton className="h-64 w-full" />
+        ) : rooms.length === 0 ? (
           <Card className="border-dashed shadow-none">
             <Empty className="min-h-64">
               <EmptyHeader>
-                <EmptyMedia variant="icon"><HugeiconsIcon icon={Image01Icon} /></EmptyMedia>
+                <EmptyMedia variant="icon">
+                  <HugeiconsIcon icon={Image01Icon} />
+                </EmptyMedia>
                 <EmptyTitle>No rooms in inventory</EmptyTitle>
-                <EmptyDescription>Add the first room with its rate and photography.</EmptyDescription>
+                <EmptyDescription>
+                  Add the first room with its rate and photography.
+                </EmptyDescription>
               </EmptyHeader>
-              <EmptyContent><Button onClick={() => setOpen(true)}>Add first room</Button></EmptyContent>
+              <EmptyContent>
+                <Button onClick={() => setOpen(true)}>Add first room</Button>
+              </EmptyContent>
             </Empty>
           </Card>
         ) : (
-          <Card className="overflow-hidden py-0 shadow-sm">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader><TableRow><TableHead>Room</TableHead><TableHead>Type</TableHead><TableHead>Rate</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Action</TableHead></TableRow></TableHeader>
-                <TableBody>
-                  {rooms.map((room) => (
-                    <TableRow key={room._id}>
-                      <TableCell><div className="flex min-w-44 items-center gap-3"><RoomImage roomName={room.name ?? room.type} imageUrls={room.imageUrls} className="min-h-12 w-16 shrink-0" /><div><div className="font-medium">{room.name ?? `Room ${room.roomNumber}`}</div><div className="text-xs text-muted-foreground">Room {room.roomNumber}</div></div></div></TableCell>
-                      <TableCell>{room.type}</TableCell>
-                      <TableCell className="tabular-nums">{formatRate(room.nightlyRate)}</TableCell>
-                      <TableCell>
-                        <Select
-                          value={room.status}
-                          disabled={statusPendingId === room._id}
-                          onValueChange={(value) => {
-                            if (value) void handleStatusChange(room._id, value as Status);
-                          }}
-                        >
-                          <SelectTrigger size="sm" className="w-36"><SelectValue /></SelectTrigger>
-                          <SelectContent><SelectGroup>{STATUSES.map((status) => <SelectItem key={status} value={status}>{status}</SelectItem>)}</SelectGroup></SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="text-right"><Button variant="ghost" size="icon-sm" aria-label={`Delete room ${room.roomNumber}`} onClick={() => { setDeleteError(null); setDeleteId(room._id); }}><HugeiconsIcon icon={Delete02Icon} /></Button></TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+          <>
+            <div className="grid gap-3 md:hidden">
+              {rooms.map((room) => (
+                <Card key={room._id} size="sm" className="shadow-sm">
+                  <div className="flex min-w-0 items-start gap-3 px-4">
+                    <RoomImage
+                      roomName={room.name ?? room.type}
+                      imageUrls={room.imageUrls}
+                      className="min-h-16 w-20 shrink-0"
+                    />
+                    <div className="min-w-0 flex-1 py-1">
+                      <p className="truncate font-medium">
+                        {room.name ?? `Room ${room.roomNumber}`}
+                      </p>
+                      <p className="mt-1 truncate text-xs text-muted-foreground">
+                        Room {room.roomNumber} · {room.type}
+                      </p>
+                      <p className="mt-1 text-sm tabular-nums">{formatRate(room.nightlyRate)}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon-lg"
+                      aria-label={`Delete room ${room.roomNumber}`}
+                      onClick={() => {
+                        setDeleteError(null);
+                        setDeleteId(room._id);
+                      }}
+                    >
+                      <HugeiconsIcon icon={Delete02Icon} aria-hidden />
+                    </Button>
+                  </div>
+                  <div className="border-t px-4 pt-4">
+                    <Label htmlFor={`mobile-status-${room._id}`}>Status</Label>
+                    <Select
+                      value={room.status}
+                      disabled={statusPendingId === room._id}
+                      onValueChange={(value) => {
+                        if (value) void handleStatusChange(room._id, value as Status);
+                      }}
+                    >
+                      <SelectTrigger id={`mobile-status-${room._id}`} className="mt-2 w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {STATUSES.map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {status}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </Card>
+              ))}
             </div>
-          </Card>
+            <Card className="hidden overflow-hidden py-0 shadow-sm md:flex">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Room</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Rate</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rooms.map((room) => (
+                      <TableRow key={room._id}>
+                        <TableCell>
+                          <div className="flex min-w-44 items-center gap-3">
+                            <RoomImage
+                              roomName={room.name ?? room.type}
+                              imageUrls={room.imageUrls}
+                              className="min-h-12 w-16 shrink-0"
+                            />
+                            <div>
+                              <div className="font-medium">
+                                {room.name ?? `Room ${room.roomNumber}`}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                Room {room.roomNumber}
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{room.type}</TableCell>
+                        <TableCell className="tabular-nums">
+                          {formatRate(room.nightlyRate)}
+                        </TableCell>
+                        <TableCell>
+                          <Select
+                            value={room.status}
+                            disabled={statusPendingId === room._id}
+                            onValueChange={(value) => {
+                              if (value) void handleStatusChange(room._id, value as Status);
+                            }}
+                          >
+                            <SelectTrigger size="sm" className="w-36">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                {STATUSES.map((status) => (
+                                  <SelectItem key={status} value={status}>
+                                    {status}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label={`Delete room ${room.roomNumber}`}
+                            onClick={() => {
+                              setDeleteError(null);
+                              setDeleteId(room._id);
+                            }}
+                          >
+                            <HugeiconsIcon icon={Delete02Icon} />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </Card>
+          </>
         )}
       </div>
 
-      <Dialog open={deleteId !== null} onOpenChange={(value) => { if (!value && !deletePending) { setDeleteId(null); setDeleteError(null); } }}>
+      <Dialog
+        open={deleteId !== null}
+        onOpenChange={(value) => {
+          if (!value && !deletePending) {
+            setDeleteId(null);
+            setDeleteError(null);
+          }
+        }}
+      >
         <DialogContent>
-          <DialogHeader><DialogTitle>Delete room {roomToDelete?.roomNumber}?</DialogTitle><DialogDescription>This removes the room and its uploaded images. Existing reservation records remain available.</DialogDescription></DialogHeader>
-          {deleteError ? <p role="alert" className="text-sm text-destructive">{deleteError}</p> : null}
-          <DialogFooter><DialogClose render={<Button variant="outline" disabled={deletePending} />}>Cancel</DialogClose><Button variant="destructive" disabled={deletePending} onClick={() => void handleDelete()}>{deletePending ? "Deleting..." : "Delete room"}</Button></DialogFooter>
+          <DialogHeader>
+            <DialogTitle>Delete room {roomToDelete?.roomNumber}?</DialogTitle>
+            <DialogDescription>
+              This removes the room and its uploaded images. Existing reservation records remain
+              available.
+            </DialogDescription>
+          </DialogHeader>
+          {deleteError ? (
+            <InlineAlert title="This room was not deleted" description={deleteError} />
+          ) : null}
+          <DialogFooter>
+            <DialogClose render={<Button variant="outline" disabled={deletePending} />}>
+              Cancel
+            </DialogClose>
+            <Button
+              variant="destructive"
+              disabled={deletePending}
+              onClick={() => void handleDelete()}
+            >
+              {deletePending ? "Deleting…" : "Delete room"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

@@ -21,14 +21,14 @@ export function RoomCard({ room }: { room: PublicRoom }) {
         className="min-h-64 rounded-none border-0 ring-0"
       />
       <CardHeader className="gap-3 px-5 pt-5">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:gap-4">
           <div>
             <Badge variant="secondary">{room.type}</Badge>
             <CardTitle className="mt-3 font-heading text-xl font-semibold tracking-tight">
               {details.name}
             </CardTitle>
           </div>
-          <div className="text-right">
+          <div className="sm:text-right">
             <div className="font-heading text-lg font-semibold tabular-nums">
               {formatGHS(room.nightlyRate)}
             </div>
@@ -36,7 +36,7 @@ export function RoomCard({ room }: { room: PublicRoom }) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="grid grid-cols-3 gap-3 px-5 py-4 text-xs text-muted-foreground">
+      <CardContent className="grid grid-cols-2 gap-3 px-5 py-4 text-xs text-muted-foreground sm:grid-cols-3">
         <span className="flex items-center gap-1.5">
           <HugeiconsIcon icon={UserMultipleIcon} strokeWidth={1.8} />
           {details.capacity} guests
@@ -45,7 +45,7 @@ export function RoomCard({ room }: { room: PublicRoom }) {
           <HugeiconsIcon icon={BedIcon} strokeWidth={1.8} />
           {details.bedType}
         </span>
-        <span className="flex items-center justify-end gap-1.5">
+        <span className="col-span-2 flex items-center gap-1.5 sm:col-span-1 sm:justify-end">
           <HugeiconsIcon icon={RulerIcon} strokeWidth={1.8} />
           {details.sizeSqm} m²
         </span>

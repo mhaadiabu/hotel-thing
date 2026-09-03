@@ -5,6 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  color-scheme: light;
   --background: oklch(0.985 0.004 160);
   --foreground: oklch(0.19 0.018 165);
   --card: oklch(0.998 0.002 160);
@@ -49,6 +50,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.16 0.018 164);
   --foreground: oklch(0.96 0.008 160);
   --card: oklch(0.205 0.022 164);
@@ -131,10 +133,17 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply font-sans bg-background text-foreground;
+    @apply min-w-0 overflow-x-clip font-sans bg-background text-foreground;
   }
   html {
-    @apply font-sans;
+    @apply overflow-x-clip font-sans;
+  }
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
   }
 }
 

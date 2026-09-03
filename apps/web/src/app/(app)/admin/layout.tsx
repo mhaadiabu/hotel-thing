@@ -19,7 +19,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <RoleGate allow={["admin"]}>
       <div>
-        <nav className="flex items-center gap-5 overflow-x-auto border-b px-4 sm:px-6">
+        <nav
+          aria-label="Admin sections"
+          className="flex items-center gap-5 overflow-x-auto overscroll-x-contain border-b px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-6"
+        >
           {TABS.map((tab) => {
             const isActive = pathname === tab.href;
             return (
@@ -27,7 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 key={tab.href}
                 href={tab.href}
                 className={cn(
-                  "shrink-0 border-b-2 py-3 text-sm transition-colors",
+                  "shrink-0 border-b-2 py-3.5 text-sm transition-colors",
                   isActive
                     ? "border-foreground text-foreground"
                     : "border-transparent text-muted-foreground hover:text-foreground",

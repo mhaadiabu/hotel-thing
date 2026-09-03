@@ -1,6 +1,7 @@
 import { ConvexError, v } from "convex/values";
 
-import { mutation, query } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
+import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import { requireAuth, requireRole } from "./lib/auth";
 import { inferRoomCapacity } from "./lib/rooms";
 
@@ -53,6 +54,38 @@ function parseCalendarDate(value: string): number | null {
 function getHotelDay(): string {
   return new Date().toISOString().slice(0, 10);
 }
+
+async function datesOverlap(
+  ctx: QueryCtx | MutationCtx,
+  roomId: Id<"rooms">,
+  checkIn: string,
+  checkOut: string,
+): Promise<boolean> {
+  const reservationWithEarliestCheckout = await ctx.db
+    .query("reservations")
+    .withIndex("by_room_status_and_checkOut", (q) =>
+      q.eq("roomId", roomId).eq("status", "confirmed").gt("checkOut", checkIn),
+    )
+    .first();
+
+  return (
+    reservationWithEarliestCheckout !== null &&
+    checkIn < reservationWithEarliestCheckout.checkOut &&
+    checkOut > reservationWithEarliestCheckout.checkIn
+  );
+}
+
+export const checkAvailability = query({
+  args: {
+    roomId: v.id("rooms"),
+    checkIn: v.string(),
+    checkOut: v.string(),
+  },
+  returns: v.object({ available: v.boolean() }),
+  handler: async (ctx, args) => ({
+    available: !(await datesOverlap(ctx, args.roomId, args.checkIn, args.checkOut)),
+  }),
+});
 
 export const create = mutation({
   args: {
@@ -108,21 +141,7 @@ export const create = mutation({
       });
     }
 
-    const reservationWithEarliestCheckout = await ctx.db
-      .query("reservations")
-      .withIndex("by_room_status_and_checkOut", (q) =>
-        q
-          .eq("roomId", args.roomId)
-          .eq("status", "confirmed")
-          .gt("checkOut", args.checkIn),
-      )
-      .first();
-    const overlaps =
-      reservationWithEarliestCheckout !== null &&
-      args.checkIn < reservationWithEarliestCheckout.checkOut &&
-      args.checkOut > reservationWithEarliestCheckout.checkIn;
-
-    if (overlaps) {
+    if (await datesOverlap(ctx, args.roomId, args.checkIn, args.checkOut)) {
       throw new ConvexError({
         code: "DATES_UNAVAILABLE",
         message: "Those dates are already reserved. Choose another stay.",

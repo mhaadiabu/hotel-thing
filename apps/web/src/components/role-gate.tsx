@@ -46,7 +46,7 @@ export function RoleGate({ allow, children }: RoleGateProps) {
       <div className="container mx-auto max-w-3xl px-4 py-10">
         <p className="font-medium">We could not verify your access.</p>
         <p className="mt-2 text-sm text-muted-foreground">
-          Sign out and sign in again. If this continues, check the Clerk Convex JWT setup.
+          Refresh the page, or sign out and sign in again.
         </p>
       </div>
     );
