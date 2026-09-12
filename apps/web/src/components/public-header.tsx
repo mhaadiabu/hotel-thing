@@ -3,14 +3,16 @@
 import { useUser } from "@clerk/nextjs";
 import { api } from "@hotel/backend/convex/_generated/api";
 import { roleHomePath } from "@hotel/backend/convex/lib/roles";
-import { Hotel01Icon, Menu01Icon, Moon02Icon, Sun02Icon } from "@hugeicons/core-free-icons";
+import { Menu01Icon, Moon02Icon, Sun02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "convex/react";
 import { useTheme } from "next-themes";
+import Image from "next/image";
 import Link from "next/link";
 import type { Route } from "next";
 import { useEffect, useState } from "react";
 
+import havenMark from "@/app/haven-mark.png";
 import { AccountMenu } from "@/components/account-menu";
 import { Button } from "@hotel/ui/components/button";
 import {
@@ -38,7 +40,7 @@ export function PublicHeader() {
           href="/"
           className="flex shrink-0 items-center gap-2 whitespace-nowrap font-heading text-sm font-semibold tracking-tight min-[350px]:text-base sm:text-lg"
         >
-          <HugeiconsIcon icon={Hotel01Icon} aria-hidden strokeWidth={1.8} />
+          <Image src={havenMark} alt="" aria-hidden priority className="size-8 object-contain" />
           Haven Hotel
         </Link>
         <nav className="hidden items-center gap-7 text-sm text-muted-foreground sm:flex">
