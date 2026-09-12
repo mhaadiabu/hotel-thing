@@ -41,6 +41,8 @@ const CATEGORY_LABELS = {
   other: "Other",
 } as const;
 
+const CANCELLATION_WINDOW_MS = 24 * 60 * 60 * 1000;
+
 export default function GuestPage() {
   return (
     <RoleGate allow={["admin", "staff", "guest"]}>
@@ -53,11 +55,15 @@ function GuestHome() {
   const stays = useQuery(api.reservations.mine);
   const requests = useQuery(api.serviceRequests.mine);
   const createRequest = useMutation(api.serviceRequests.create);
+  const cancelReservation = useMutation(api.reservations.cancel);
   const [requestStayId, setRequestStayId] = useState<Id<"reservations"> | null>(null);
+  const [cancelStayId, setCancelStayId] = useState<Id<"reservations"> | null>(null);
   const [category, setCategory] = useState<keyof typeof CATEGORY_LABELS>("housekeeping");
   const [details, setDetails] = useState("");
   const [requestError, setRequestError] = useState<string | null>(null);
   const [requestPending, setRequestPending] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [cancelPending, setCancelPending] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
 
   async function handleRequest() {
@@ -75,6 +81,24 @@ function GuestHome() {
       );
     } finally {
       setRequestPending(false);
+    }
+  }
+
+  async function handleCancel() {
+    if (!cancelStayId) return;
+
+    setCancelPending(true);
+    setCancelError(null);
+    try {
+      await cancelReservation({ reservationId: cancelStayId });
+      setCancelStayId(null);
+    } catch (error) {
+      setCancelError(
+        getAppError(error, "We could not cancel this booking. Check your connection and try again.")
+          .message,
+      );
+    } finally {
+      setCancelPending(false);
     }
   }
 
@@ -126,6 +150,9 @@ function GuestHome() {
                 reservation.status === "confirmed" &&
                 reservation.checkIn <= today &&
                 today < reservation.checkOut;
+              const canCancel =
+                reservation.status === "confirmed" &&
+                Date.now() < reservation.createdAt + CANCELLATION_WINDOW_MS;
 
               return (
                 <Card key={reservation._id} className="shadow-sm">
@@ -152,18 +179,34 @@ function GuestHome() {
                     <div className="font-heading text-xl font-semibold tabular-nums">
                       {formatGHS(reservation.totalAmount)}
                     </div>
-                    {canRequestHelp ? (
-                      <Button
-                        variant="outline"
-                        className="w-full sm:w-auto"
-                        onClick={() => {
-                          setRequestStayId(reservation._id);
-                          setDetails("");
-                          setRequestError(null);
-                        }}
-                      >
-                        Request help
-                      </Button>
+                    {canRequestHelp || canCancel ? (
+                      <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                        {canRequestHelp ? (
+                          <Button
+                            variant="outline"
+                            className="w-full sm:w-auto"
+                            onClick={() => {
+                              setRequestStayId(reservation._id);
+                              setDetails("");
+                              setRequestError(null);
+                            }}
+                          >
+                            Request help
+                          </Button>
+                        ) : null}
+                        {canCancel ? (
+                          <Button
+                            variant="destructive"
+                            className="w-full sm:w-auto"
+                            onClick={() => {
+                              setCancelStayId(reservation._id);
+                              setCancelError(null);
+                            }}
+                          >
+                            Cancel booking
+                          </Button>
+                        ) : null}
+                      </div>
                     ) : null}
                   </CardContent>
                 </Card>
@@ -259,6 +302,42 @@ function GuestHome() {
             </Button>
             <Button disabled={requestPending} onClick={() => void handleRequest()}>
               {requestPending ? "Sending…" : "Send request"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={cancelStayId !== null}
+        onOpenChange={(value) => {
+          if (!value && !cancelPending) setCancelStayId(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel this booking?</DialogTitle>
+            <DialogDescription>
+              This will release the room dates. You can cancel a booking within 24 hours of making
+              it.
+            </DialogDescription>
+          </DialogHeader>
+          {cancelError ? (
+            <InlineAlert title="We could not cancel this booking" description={cancelError} />
+          ) : null}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              disabled={cancelPending}
+              onClick={() => setCancelStayId(null)}
+            >
+              Keep booking
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={cancelPending}
+              onClick={() => void handleCancel()}
+            >
+              {cancelPending ? "Cancelling…" : "Cancel booking"}
             </Button>
           </DialogFooter>
         </DialogContent>

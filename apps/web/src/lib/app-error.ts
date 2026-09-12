@@ -2,6 +2,7 @@ import { ConvexError } from "convex/values";
 
 const ERROR_MESSAGES = {
   CHECK_IN_IN_PAST: "Choose today or a later date for check-in.",
+  CANCELLATION_WINDOW_CLOSED: "Bookings can only be cancelled within 24 hours of being made.",
   DATES_UNAVAILABLE: "Choose different check-in and check-out dates.",
   FORBIDDEN: "You do not have permission to do that.",
   INVALID_DATES: "Choose a valid check-in and check-out date.",
@@ -14,6 +15,7 @@ const ERROR_MESSAGES = {
   ROOM_HAS_RESERVATIONS: "This room has an active or upcoming reservation and cannot be deleted.",
   ROOM_NUMBER_EXISTS: "A room with this number already exists. Choose another room number.",
   ROOM_UNAVAILABLE: "This room is no longer available. Choose another room.",
+  RESERVATION_NOT_CANCELLABLE: "This booking can no longer be cancelled.",
   STAY_NOT_ACTIVE: "You can request help between check-in and check-out.",
   UNAUTHENTICATED: "Your session has expired. Sign in again and retry.",
 } as const;

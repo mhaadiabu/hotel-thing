@@ -39,6 +39,7 @@ const paymentValidator = v.object({
 });
 
 const CALENDAR_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const CANCELLATION_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 function parseCalendarDate(value: string): number | null {
   if (!CALENDAR_DATE_PATTERN.test(value)) return null;
@@ -171,6 +172,39 @@ export const create = mutation({
       createdAt,
     });
     return reservationId;
+  },
+});
+
+export const cancel = mutation({
+  args: { reservationId: v.id("reservations") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const identity = await requireAuth(ctx);
+    const reservation = await ctx.db.get("reservations", args.reservationId);
+
+    if (!reservation || reservation.guestTokenIdentifier !== identity.tokenIdentifier) {
+      throw new ConvexError({
+        code: "FORBIDDEN",
+        message: "This booking is not linked to your account.",
+      });
+    }
+
+    if (reservation.status !== "confirmed") {
+      throw new ConvexError({
+        code: "RESERVATION_NOT_CANCELLABLE",
+        message: "This booking can no longer be cancelled.",
+      });
+    }
+
+    if (Date.now() >= reservation.createdAt + CANCELLATION_WINDOW_MS) {
+      throw new ConvexError({
+        code: "CANCELLATION_WINDOW_CLOSED",
+        message: "Bookings can only be cancelled within 24 hours of being made.",
+      });
+    }
+
+    await ctx.db.patch(args.reservationId, { status: "cancelled" });
+    return null;
   },
 });
 
