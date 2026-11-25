@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@hotel/config": "workspace:*",
-    "@types/node": "^22.13.14",
+    "@types/node": "^26.6.6",
     "tsrs": "catalog:"
   }
 }

@@ -23,11 +23,11 @@
   },
   "devDependencies": {
     "@hotel/config": "workspace:*",
-    "@types/node": "^22.20.1",
-    "oxfmt": "^0.57.0",
-    "oxlint": "^1.92.0",
-    "turbo": "^2.10.7",
-    "tsrs": "catalog:"
+    "@types/node": "^26.6.6",
+    "oxfmt": "^0.80.0",
+    "oxlint": "^1.95.0",
+    "tsrs": "catalog:",
+    "turbo": "^2.11.13"
   },
   "packageManager": "pnpm@11.17.0"
 }

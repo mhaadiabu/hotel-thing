@@ -9,16 +9,16 @@ allowBuilds:
   sharp: true
   utf-8-validate: false
 catalog:
-  dotenv: ^17.4.2
-  zod: ^4.4.3
+  dotenv: ^18.0.10
+  zod: ^4.6.7
   tsrs: 7.1.0-beta.tsrs5
-  lucide-react: ^1.27.0
+  lucide-react: ^1.78.0
   next-themes: ^0.4.6
-  react: ^19.2.8
-  react-dom: ^19.2.8
-  sonner: ^2.0.7
-  convex: ^1.42.3
-  "@tailwindcss/postcss": ^4.3.3
-  "@types/react": ^19.2.17
-  "@types/react-dom": ^19.2.3
-  tailwindcss: ^4.3.3
+  react: ^19.3.1
+  react-dom: ^19.3.1
+  sonner: ^2.0.8
+  convex: ^1.51.0
+  "@tailwindcss/postcss": ^4.3.5
+  "@types/react": ^19.3.0
+  "@types/react-dom": ^19.3.0
+  tailwindcss: ^4.3.5
