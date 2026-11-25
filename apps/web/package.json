@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 3001",
-    "build": "tsc -b && next build",
+    "build": "tsrs -b && next build",
     "start": "next start"
   },
   "dependencies": {
@@ -34,6 +34,7 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "catalog:"
+    "tsrs": "catalog:",
+    "typescript": "^6.0.3"
   }
 }
